@@ -415,7 +415,10 @@
   function lessonPrerequisite(lesson) {
     const prefix = 'lesson.' + (lesson + 1);
     const prerequisite = node('aside',undefined,'prerequisite');
-    prerequisite.append(node('h4',t('lesson.prerequisite')),node('p',t(prefix + '.prerequisite')));
+    prerequisite.append(node('h4',t('lesson.prerequisite')));
+    for (const paragraph of t(prefix + '.prerequisite').split('\n')) {
+      prerequisite.append(node('p',paragraph));
+    }
     if (lessonTools[lesson].length) {
       prerequisite.append(relatedTools(lesson));
     }
