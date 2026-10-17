@@ -33,10 +33,10 @@ test('No unsafe DOM writes, inline handlers, networking, workers or record persi
   assert.ok(storage.every(match => match[2] === 'hash-chain-tamper-trainer.lang'));
   assert.doesNotMatch(html, /type="file"|type="module"/);
 });
-test('Unique IDs, five accessible tabs and explicit hidden override', () => {
+test('Unique IDs, three entrances and three free-experiment tabs and explicit hidden override', () => {
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(ids.length, new Set(ids).size);
-  for (const name of ['build','tamper','protect','learn','quiz']) {
+  for (const name of ['guide','free','learn','build','tamper','protect']) {
     assert.match(html, new RegExp(`id="tab-${name}"[^>]*role="tab"[^>]*aria-controls="panel-${name}"`));
     assert.match(html, new RegExp(`id="panel-${name}"[^>]*role="tabpanel"[^>]*aria-labelledby="tab-${name}"`));
   }
@@ -73,12 +73,32 @@ test('Dynamic reference links match the exact approved list in both languages', 
   "https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History",
   "https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md",
   "https://doi.org/10.6028/NIST.FIPS.180-4",
-  "https://www.rfc-editor.org/rfc/rfc4231"
+  "https://www.rfc-editor.org/rfc/rfc4231",
+  "https://ipusiron.github.io/hash-detector/",
+  "https://ipusiron.github.io/git-secrets-playground/",
+  "https://ipusiron.github.io/mic-gain-logger/",
+  "https://ipusiron.github.io/basexx-visualizer/",
+  "https://ipusiron.github.io/jwt-inspector/",
+  "https://ipusiron.github.io/hashviz/",
+  "https://ipusiron.github.io/hex-dump-trainer/",
+  "https://ipusiron.github.io/otp-animation/"
 ];
   for (const lang of ['ja','en']) {
-    const urls = Object.entries(messages[lang]).filter(([key]) => /^reference\.\d+\.url$/.test(key)).map(([,value])=>value);
+    const urls = Object.entries(messages[lang]).filter(([key]) => /^(?:reference|tool)\.\d+\.url$/.test(key)).map(([,value])=>value);
     assert.deepEqual(urls.sort(), allowed.slice().sort());
   }
   assert.match(app, /link\.rel = 'noopener noreferrer'/);
   assert.match(app, /link\.target = '_blank'/);
+});
+
+test('Seven non-modal steps expose progress, tasks, results and navigation', () => {
+  assert.match(html, /<ol id="guide-steps"/);
+  assert.match(html, /<progress id="guide-progress" max="7"/);
+  assert.match(app, /setAttribute\('aria-current', 'step'\)/);
+  assert.doesNotMatch(html, /<dialog|aria-modal/);
+  for (const id of ['guide-action','guide-task','guide-result','guide-takeaway','guide-lesson','guide-back','guide-next','guide-reset']) assert.ok(html.includes('id="'+id+'"'));
+  const messages = require('../messages.js');
+  for (const lang of ['ja','en']) for (let step=1;step<=7;step+=1) {
+    for (const field of ['title','task','action','learned']) assert.ok(messages[lang]['guide.'+step+'.'+field]);
+  }
 });
