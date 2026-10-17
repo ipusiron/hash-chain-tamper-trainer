@@ -96,7 +96,7 @@ test('Seven non-modal steps expose progress, tasks, results and navigation', () 
   assert.match(html, /<progress id="guide-progress" max="7"/);
   assert.match(app, /setAttribute\('aria-current', 'step'\)/);
   assert.doesNotMatch(html, /<dialog|aria-modal/);
-  for (const id of ['guide-action','guide-task','guide-result','guide-takeaway','guide-lesson','guide-back','guide-next','guide-reset']) assert.ok(html.includes('id="'+id+'"'));
+  for (const id of ['guide-action','guide-task','guide-result','guide-takeaway','guide-aim','guide-background','guide-now','guide-mechanism','guide-back','guide-next','guide-reset']) assert.ok(html.includes('id="'+id+'"'));
   const messages = require('../messages.js');
   for (const lang of ['ja','en']) for (let step=1;step<=7;step+=1) {
     for (const field of ['title','task','action','learned']) assert.ok(messages[lang]['guide.'+step+'.'+field]);

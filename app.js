@@ -18,7 +18,7 @@
     .find(value => value === 'ja' || value === 'en');
   const state = { base: null, working: null, verified: null, shown: null, completed: 0,
     matrix: null, rechained: null, changed: false, busy: false, error: null,
-    selected: [], active: 'guide', answers: {}, lesson: 0, question: 0, returnQuestion: null, returnGuide: null, freeActive: 'build' };
+    selected: [], active: 'guide', answers: {}, lesson: 0, question: 0, returnQuestion: null, freeActive: 'build' };
 
   function t(key, values = {}) {
     const text = messages[language][key];
@@ -106,9 +106,9 @@
     });
   }
 
-  function hashDetails(hash, input) {
+  function hashDetails(hash, input, digits = 12) {
     const details = node('details');
-    details.append(node('summary', hash.slice(0, 12) + '\u2026'));
+    details.append(node('summary', hash.slice(0, digits) + '\u2026'));
     if (input !== undefined) {
       details.append(node('p', t('input')));
       const code = node('code', undefined, 'hash-input');
@@ -122,13 +122,13 @@
     return details;
   }
 
-  function renderChain(container, chain, result, pending = false) {
+  function renderChain(container, chain, result, pending = false, digits = 12) {
     container.replaceChildren();
     if (!chain) return;
     const header = node('details');
     header.append(node('summary', t('headers')), node('pre', chain.headers.join('\n')));
     const seedTitle = node('p', t(chain.includeHeader ? 'seed' : 'seedFixed'));
-    header.append(seedTitle, hashDetails(chain.seed, chain.includeHeader ? chain.headers.join('\n') : undefined));
+    header.append(seedTitle, hashDetails(chain.seed, chain.includeHeader ? chain.headers.join('\n') : undefined, digits));
     container.append(header);
     const list = node('ol', undefined, 'chain-list');
     chain.rows.forEach((row, i) => {
@@ -139,8 +139,8 @@
       fields.append(node('strong', String(i + 1) + '. '), node('code', row.fields.join(',')));
       const previous = i === 0 ? chain.seed : chain.rows[i - 1].hash;
       const heads = node('span', undefined, 'row-heads');
-      heads.append(node('span', t('inputHead')), node('code', previous.slice(0, 8), 'chain-link'),
-        node('span', ' → '), node('code', row.hash.slice(0, 12) + '\u2026', 'chain-link'));
+      heads.append(node('span', t('inputHead')), node('code', previous.slice(0, 8) + (digits === 8 ? '\u2026' : ''), 'chain-link'),
+        node('span', ' → '), node('code', row.hash.slice(0, digits) + '\u2026', 'chain-link'));
       if (result) {
         const valid = result.rows[i].valid;
         details.classList.add(valid ? 'good' : 'bad');
@@ -157,7 +157,7 @@
     if (pending) container.append(node('p', t('trailerPending')));
     else if (chain.trailer) {
       container.append(node('p', t('trailer')),
-        hashDetails(chain.trailer.hash, core.trailerInput(core.tip(chain), chain.rows.length)));
+        hashDetails(chain.trailer.hash, core.trailerInput(core.tip(chain), chain.rows.length), digits));
     } else container.append(node('p', t('trailerNone')));
   }
 
@@ -388,19 +388,14 @@
   }));
   $('role-select').addEventListener('change', () => renderMatrix());
 
-  function renderLearning() {
-    replaceOptions($('lesson-select'), lessonRows.map((_, i) => [i, t('lesson.' + (i + 1) + '.title')]));
-    $('lesson-select').value = String(state.lesson);
-    $('back-to-quiz').hidden = state.returnQuestion === null;
-    $('back-to-guide').hidden = state.returnGuide === null;
-    const content = $('lesson-content');
-    const prefix = 'lesson.' + (state.lesson + 1);
+  function lessonPrerequisite(lesson) {
+    const prefix = 'lesson.' + (lesson + 1);
     const prerequisite = node('aside',undefined,'prerequisite');
     prerequisite.append(node('h4',t('lesson.prerequisite')),node('p',t(prefix + '.prerequisite')));
-    if (lessonTools[state.lesson].length) {
+    if (lessonTools[lesson].length) {
       const tools = node('div',undefined,'related-tools');
       tools.setAttribute('aria-label',t('lesson.relatedTools'));
-      lessonTools[state.lesson].forEach(day => {
+      lessonTools[lesson].forEach(day => {
         const link = node('a',t('tool.' + day + '.title'));
         link.href = t('tool.' + day + '.url');
         link.target = '_blank';
@@ -409,14 +404,18 @@
       });
       prerequisite.append(tools);
     }
-    content.replaceChildren(node('h3', t(prefix + '.title')),prerequisite);
+    return prerequisite;
+  }
+
+  function lessonBody(lesson, content) {
+    const prefix = 'lesson.' + (lesson + 1);
     const paragraphs = t(prefix + '.body').split('\n');
     content.append(node('p',paragraphs[0]));
     const points = node('ul',undefined,'lesson-points');
     paragraphs.slice(1).forEach(text => points.append(node('li',text)));
     content.append(points);
-    if (state.lesson === 7) content.append(node('p',t('lesson.8.distinction'),'privacy'));
-    if (state.lesson === 4) {
+    if (lesson === 7) content.append(node('p',t('lesson.8.distinction'),'privacy'));
+    if (lesson === 4) {
       for (const key of ['quote.1','quote.2']) {
         const quote = node('blockquote', t(key));
         quote.lang = 'en';
@@ -427,7 +426,7 @@
     const table = node('table');
     const thead = node('thead');
     const tbody = node('tbody');
-    for (let i = 0; i < lessonRows[state.lesson]; i += 1) {
+    for (let i = 0; i < lessonRows[lesson]; i += 1) {
       const tr = node('tr');
       for (const column of ['a','b']) {
         const cell = node(i === 0 ? 'th' : 'td', t(prefix + '.table.' + i + '.' + column));
@@ -439,7 +438,7 @@
     table.append(thead, tbody);
     content.append(table);
     const links = node('ul');
-    lessonReferences[state.lesson].forEach(index => {
+    lessonReferences[lesson].forEach(index => {
       const li = node('li');
       const link = node('a', t('reference.' + index + '.title'));
       link.href = t('reference.' + index + '.url');
@@ -449,6 +448,16 @@
       links.append(li);
     });
     content.append(links);
+  }
+
+  function renderLearning() {
+    replaceOptions($('lesson-select'), lessonRows.map((_, i) => [i, t('lesson.' + (i + 1) + '.title')]));
+    $('lesson-select').value = String(state.lesson);
+    $('back-to-quiz').hidden = state.returnQuestion === null;
+    const content = $('lesson-content');
+    const prefix = 'lesson.' + (state.lesson + 1);
+    content.replaceChildren(node('h3', t(prefix + '.title')),lessonPrerequisite(state.lesson));
+    lessonBody(state.lesson, content);
     replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1})]));
     $('question-select').value = String(state.question);
     const questionPrefix = 'quiz.' + (state.question + 1);
@@ -512,12 +521,14 @@
   $('quiz-reset').addEventListener('click', () => {
     delete state.answers[state.question];
     renderLearning();
+    renderGuide();
   });
   $('lesson-try').addEventListener('click', () => showTab('protect', true));
 
   const guide = { step: 1, base: null, partial: null, shown: 0, modified: null, single: null, rebuilt: null,
     results: {}, selected: [], matrix: null, quizOpen: false, prepared: false };
-  const guideLessons = [1, 2, 2, 5, 3, 6, 0];
+  const guideSources = [[0, 1], [2], [2], [4, 5], [3], [6], []];
+  const guidePrerequisites = [[0, 1], [0, 2], [2], [4, 5], [3], [6], []];
 
   async function guideBase() {
     if (!guide.base) guide.base = await core.createChain(samples[0]);
@@ -588,9 +599,92 @@
     container.append(section);
   }
 
+  function shortHash(hash) { return hash.slice(0, 8) + '\u2026'; }
+
+  function guideObservation() {
+    const step = guide.step;
+    if (step === 1 && guide.partial) {
+      const chain = guide.partial;
+      if (!guide.shown) return [t('guide.now.seed', {seed:shortHash(chain.seed)})];
+      const n = guide.shown;
+      const row = chain.rows[n - 1];
+      const previous = n === 1 ? chain.seed : chain.rows[n - 2].hash;
+      const [time, room, card, direction] = row.fields;
+      const values = {n, record:row.fields.join(','), time, room, card,
+        movement:t('guide.movement.' + direction), prior:shortHash(previous), hash:shortHash(row.hash)};
+      const text = [t('guide.now.row', values)];
+      if (n < samples[0].rows.length) text.push(t('guide.now.next', {n:n + 1, hash:shortHash(row.hash)}));
+      else text.push(t('guide.now.trailer', {count:n, tip:shortHash(row.hash), trailer:shortHash(chain.trailer.hash)}));
+      return text;
+    }
+    if ((step === 2 || step === 3) && guide.results[step]) {
+      const result = guide.results[step];
+      return [t('guide.now.' + step, {first:result.firstMismatch, before:guide.base.rows[1].fields.join(','),
+        after:guide.modified.rows[1].fields.join(','), old:shortHash(guide.base.rows[1].hash),
+        hash:shortHash(guide.results[2].rows[1].expected),
+        expected:shortHash(result.expected), actual:shortHash(result.actual)})];
+    }
+    if (step === 4 && guide.results[4]) return [t('guide.now.4', {first:guide.results[3].firstMismatch,
+      count:guide.results[4].rows.length, result:t(guide.results[4].valid ? 'pass' : 'fail'),
+      tip:shortHash(core.tip(guide.rebuilt))})];
+    if (step === 5 && guide.results[5]) {
+      const [without, withTrailer] = guide.results[5];
+      return [t('guide.now.5', {count:without.rows.length, original:guide.base.rows.length,
+        without:t(without.valid ? 'pass' : 'fail'), with:t(withTrailer.valid ? 'pass' : 'fail'),
+        expected:shortHash(withTrailer.expected), actual:shortHash(withTrailer.actual)})];
+    }
+    if (step === 6 && guide.matrix) return guide.matrix.map((row, i) => t('guide.now.6', {
+      protection:i === 5 ? t('protection.selected') : t('protection.' + (row.protections[0] || 'none')),
+      outsider:t(row.results[0].detected ? 'detected' : 'undetected'),
+      recorder:t(row.results[1].detected ? 'detected' : 'undetected')}));
+    if (step === 7 && guide.quizOpen) {
+      const answered = Object.hasOwn(state.answers, state.question);
+      return [t('guide.now.7', {count:Object.keys(state.answers).length, total:quizAnswers.length, n:state.question + 1,
+        result:answered ? t(state.answers[state.question] === quizAnswers[state.question] ? 'quiz.correct' : 'quiz.incorrect') : t('guide.unanswered')})];
+    }
+    return [t('guide.waiting')];
+  }
+
+  function renderGuideExplanation() {
+    const step = guide.step;
+    $('guide-aim').textContent = t('guide.' + step + '.aim');
+    const background = $('guide-background');
+    background.replaceChildren();
+    for (const lesson of guidePrerequisites[step - 1]) {
+      const content = lessonPrerequisite(lesson);
+      content.querySelector('h4').remove();
+      content.className = 'guide-background-part';
+      content.dataset.sourceLesson = String(lesson + 1);
+      background.append(content);
+    }
+    if (step === 1) {
+      background.append(node('p',t('guide.sample')),node('p',t('guide.hashDisplay')));
+    }
+    if (step === 2) background.append(node('p',t('guide.avalanche')));
+    if (step === 7) background.append(node('p',t('guide.7.prerequisite')));
+    $('guide-now').replaceChildren(...guideObservation().map(text => node('p',text)));
+    const explanation = $('guide-explanation');
+    explanation.replaceChildren();
+    for (const lesson of guideSources[step - 1]) {
+      const section = node('section');
+      section.dataset.sourceLesson = String(lesson + 1);
+      section.append(node('h4',t('lesson.' + (lesson + 1) + '.title').replace(/^\d+\. /,'')));
+      lessonBody(lesson,section);
+      explanation.append(section);
+    }
+    if (step === 2) explanation.prepend(node('p',t('guide.avalanche')));
+    if (step === 7) {
+      explanation.append(node('p',t('guide.7.explanation')));
+      const list = node('ul');
+      for (const key of ['guide.3.learned','guide.4.learned','guide.5.learned','guide.6.learned']) list.append(node('li',t(key)));
+      explanation.append(list);
+    }
+  }
+
   function renderGuide() {
     const step = guide.step;
     $('guide-heading').textContent = t('guide.' + step + '.title');
+    renderGuideExplanation();
     $('guide-task').textContent = t('guide.' + step + '.task');
     $('guide-action').textContent = t('guide.' + step + '.action');
     $('guide-counter').textContent = t('guide.counter', {n:step});
@@ -612,18 +706,18 @@
     $('guide-understood').textContent = t('guide.' + step + '.learned');
     const output = $('guide-result');
     output.replaceChildren();
-    if (step === 1 && guide.shown) {
+    if (step === 1 && guide.partial) {
       output.append(node('p', t('progress', {done:guide.shown,total:8})));
       const flow = node('ol', undefined, 'chain-flow');
       [guide.partial.seed, ...guide.partial.rows.slice(0,2).map(row => row.hash)].slice(0,guide.shown + 1).forEach((hash,i) => {
         const li = node('li');
-        li.append(node('span', i === 0 ? t('seed') : t('guide.flowRow',{n:i})), node('code',hash.slice(0,8), 'chain-link'));
-        if (i > 0) li.append(node('span', t('guide.fromPrevious')), node('code', (i === 1 ? guide.partial.seed : guide.partial.rows[0].hash).slice(0,8), 'chain-link'));
+        li.append(node('span', i === 0 ? t('seed') : t('guide.flowRow',{n:i})), node('code',hash.slice(0,8) + '\u2026', 'chain-link'));
+        if (i > 0) li.append(node('span', t('guide.fromPrevious')), node('code', (i === 1 ? guide.partial.seed : guide.partial.rows[0].hash).slice(0,8) + '\u2026', 'chain-link'));
         flow.append(li);
       });
       output.append(flow);
       const rows = node('div');
-      renderChain(rows, {...guide.partial, rows:guide.partial.rows.slice(0,guide.shown), trailer:guide.shown === 8 ? guide.partial.trailer : null}, null, guide.shown < 8);
+      renderChain(rows, {...guide.partial, rows:guide.partial.rows.slice(0,guide.shown), trailer:guide.shown === 8 ? guide.partial.trailer : null}, null, guide.shown < 8, 8);
       output.append(rows);
     }
     if ((step === 2 || step === 3) && guide.results[step]) {
@@ -714,18 +808,6 @@
     guide.prepared = false;
     renderGuide();
   });
-  $('guide-lesson').addEventListener('click', () => {
-    state.lesson = guideLessons[guide.step - 1];
-    state.returnGuide = guide.step;
-    renderLearning();
-    showTab('learn');
-    $('lesson-select').focus();
-  });
-  $('back-to-guide').addEventListener('click', () => {
-    const step = state.returnGuide || guide.step;
-    state.returnGuide = null;
-    chooseGuide(step,true);
-  });
   $('lesson-quiz').addEventListener('click', () => showTab('quiz',true));
 
 
@@ -736,5 +818,8 @@
     render();
     setBusy(true);
     document.body.setAttribute('aria-busy', 'false');
-  } else perform(rebuild);
+  } else perform(async () => {
+    await rebuild();
+    guide.partial = await core.createChain({headers:samples[0].headers, rows:[]}, {hasTrailer:false});
+  });
 }());

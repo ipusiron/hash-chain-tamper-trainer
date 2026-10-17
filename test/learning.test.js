@@ -51,3 +51,28 @@ test('Every lesson starts with bilingual prerequisites and the requested tool ma
   }
   assert.doesNotMatch(Object.values(messages.ja).join('\n'),/今後の候補|連チェーン/);
 });
+
+test('Every guided step provides an aim and open prerequisites with complete source sections', () => {
+  for (const lang of ['ja','en']) for (let step=1;step<=7;step+=1) {
+    for (const field of ['aim','task','action','learned']) assert.ok(messages[lang][`guide.${step}.${field}`]);
+  }
+  assert.deepEqual(JSON.parse(/const guideSources = (\[[^;]+\]);/.exec(app)[1]), [[0,1],[2],[2],[4,5],[3],[6],[]]);
+  const html = fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  assert.doesNotMatch(html, /guide-lesson/);
+  assert.match(html, /<section id="guide-prerequisites"/);
+  assert.doesNotMatch(/<section id="guide-prerequisites"[^>]*>/.exec(html)[0], /hidden/);
+  for (const key of ['guide.7.prerequisite','guide.7.explanation','guide.sample','guide.hashDisplay','guide.avalanche']) assert.ok(messages.ja[key]);
+});
+test('Step one explanation templates include the calculated seed, first row and trailer', async () => {
+  const core = require('../chain-core.js');
+  const samples = require('../samples.js');
+  const chain = await core.createChain(samples[0]);
+  const short = value => value.slice(0,8)+'…';
+  const fill = (key,values) => messages.ja[key].replace(/\{(\w+)\}/g,(_,name)=>values[name]);
+  const seed = fill('guide.now.seed',{seed:short(chain.seed)});
+  assert.ok(seed.includes('7b4b04ae…'));
+  const row = fill('guide.now.row',{n:1,record:chain.rows[0].fields.join(','),time:'09:02',room:'Room-A',card:'C-1001',movement:'入室',prior:short(chain.seed),hash:short(chain.rows[0].hash)});
+  for (const value of ['7b4b04ae…','e70fd1bc…','09:02,Room-A,C-1001,IN']) assert.ok(row.includes(value));
+  const trailer = fill('guide.now.trailer',{count:8,tip:short(core.tip(chain)),trailer:short(chain.trailer.hash)});
+  assert.ok(trailer.includes('rows=8') && trailer.includes(short(chain.trailer.hash)));
+});
