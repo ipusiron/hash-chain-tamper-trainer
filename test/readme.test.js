@@ -9,7 +9,7 @@ const root = path.join(__dirname,'..');
 const read = name => fs.readFileSync(path.join(root,name),'utf8');
 const docs = ['README.md','README.en.md'].map(read);
 const headings = [
-  ['🌐 デモページ','📸 スクリーンショット','✨ 機能','📖 使い方','🔬 鎖の形式と検証結果','🎯 ユースケース','⚠️ 制約と前提','🔒 プライバシーと安全対策','🔗 参考文献と関連ツール','🧪 テスト','📁 ディレクトリー構造','💻 動作環境','📄 ライセンス','🛠️ このツールについて'],
+  ['🌐 デモページ','📸 スクリーンショット','✨ 機能','📖 使い方','🔬 ハッシュチェーンの形式と検証結果','🎯 ユースケース','⚠️ 制約と前提','🔒 プライバシーと安全対策','🔗 参考文献と関連ツール','🧪 テスト','📁 ディレクトリー構造','💻 動作環境','📄 ライセンス','🛠️ このツールについて'],
   ['🌐 Demo','📸 Screenshots','✨ Features','📖 Usage','🔬 Chain format and verification results','🎯 Use cases','⚠️ Limits and assumptions','🔒 Privacy and security','🔗 References and related tools','🧪 Tests','📁 Directory structure','💻 Requirements','📄 License','🛠️ About this tool']
 ];
 function files(dir=root, prefix='') {

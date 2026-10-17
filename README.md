@@ -3,9 +3,9 @@
 id: day117
 slug: hash-chain-tamper-trainer
 title: "Hash Chain Tamper Trainer"
-subtitle_ja: "ハッシュチェーンの改変と張り直しを学ぶ"
+subtitle_ja: "ハッシュチェーンの改変と作り直しを学ぶ"
 subtitle_en: "Learn tampering and rechaining"
-description_ja: "架空の記録を改変し、張り直しと守りの計算からハッシュチェーンの検出範囲を確かめる教材"
+description_ja: "架空の記録を改変し、作り直しと守りの計算からハッシュチェーンの検出範囲を確かめる教材"
 description_en: "Explore hash-chain detection by changing fictional records, rechaining them and comparing protections"
 category_ja: [ハッシュ関数, フォレンジック]
 category_en: [Hash Function, Digital Forensics]
@@ -17,7 +17,7 @@ hub: true
 ---
 -->
 
-# Hash Chain Tamper Trainer - ハッシュチェーンの改変と張り直しを学ぶ
+# Hash Chain Tamper Trainer - ハッシュチェーンの改変と作り直しを学ぶ
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ipusiron/hash-chain-tamper-trainer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/ipusiron/hash-chain-tamper-trainer?style=social)
@@ -30,7 +30,7 @@ hub: true
 [English](README.en.md) · 日本語
 
 Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、何が見つからないかを確かめる教材です。
-架空の記録を書き換え、後ろを全部計算し直すと検証が通ることを体験できます。先端の控え・HMAC・署名・時刻認証を加えた場合も、鍵を持つ人ごとの結果を実際に計算します。
+架空の記録を書き換え、後ろのハッシュをすべて計算し直す（作り直す）と検証が通ることを体験できます。先端の控え・HMAC・署名・時刻認証を加えた場合も、鍵を持つ人ごとの結果を実際に計算します。
 
 ## 🌐 デモページ
 
@@ -40,7 +40,7 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 
 ## 📸 スクリーンショット
 
-![入退室サンプルの鎖](assets/chain.png)
+![入退室サンプルのチェーン](assets/chain.png)
 
 *架空の8行をつなぎます。各ハッシュを開くと64文字の値と入力が見えます。*
 
@@ -56,9 +56,9 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 
 | タブ | 内容 |
 |---|---|
-| 鎖を作る | 架空の入退室8行と温度6行、1行ずつの計算、行の追加 |
+| チェーンを作る | 架空の入退室8行と温度6行、1行ずつの計算、行の追加 |
 | 改変を試す | 改変7種、最初の不一致、期待値と保存値、トレーラーの検証 |
-| 張り直しと守り | 全体の再計算、守り4つと役割2つの比較、組み合わせと4段階の内訳 |
+| 作り直しと守り | 全体の再計算、守り4つと役割2つの比較、組み合わせと4段階の内訳 |
 | 座学 | ハッシュの性質からgit・マークルツリーまで11篇 |
 | 確認問題 | 選択問題8問、解説、関連する座学への移動と戻り |
 
@@ -66,23 +66,23 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 
 ## 📖 使い方
 
-1. 「鎖を作る」でサンプルを選び、1行ずつの計算を試す
+1. 「チェーンを作る」でサンプルを選び、1行ずつの計算を試す
 2. 「改変を試す」で2行目を書き換え、最初の不一致とハッシュを確認
-3. 「張り直しと守り」で後ろを全部計算し直し、検証が通ることを確認
+3. 「作り直しと守り」で後ろを全部計算し直し、検証が通ることを確認
 4. 守りを選んで比較を計算し、第三者と記録係の結果を比較
 5. 座学と確認問題で、結果が変わる前提を確認
 
-サンプル・ヘッダー・トレーラーの設定を変えると元の鎖を作り直します。改変の各操作は元の鎖のコピーに適用します。守りの比較はサンプルの2行目を書き換える共通条件で行います。
+サンプル・ヘッダー・トレーラーの設定を変えると元のチェーンを作り直します。改変の各操作は元のチェーンのコピーに適用します。守りの比較はサンプルの2行目を書き換える共通条件で行います。
 
-## 🔬 鎖の形式と検証結果
+## 🔬 ハッシュチェーンの形式と検証結果
 
-起点はヘッダー行をLFでつないだ文字列のSHA-256です。ヘッダーを外す場合は64個の0を起点にします。各行は`previousHash + '|' + fields.join(',')`、トレーラーは`lastHash + '|rows=' + count`をハッシュ化します。
+起点はヘッダー行をLFでつないだ文字列のSHA-256です。ヘッダーを外す場合は64個の0を起点にします。各行は「前のハッシュ|項目」の形の文字列、トレーラーは「最後のハッシュ|rows=行数」の形の文字列をハッシュ化します。
 
 ハッシュは16進数64文字、表の表示は先頭12文字と省略記号です。項目はASCIIの4項目で、各1〜64文字、記録は100行までです。カンマ・縦棒・制御文字は受け付けません。空白の除去やUnicodeの正規化は行いません。HMACモードでは起点のSHA-256を保ち、行とトレーラーをHMAC-SHA256にします。
 
-次の表は入退室8行、ヘッダーとトレーラーありの結果です。行の対象は2行目、切り落としは末尾2行です。`-`は残った行に不一致がなく、元のトレーラーだけが合わないことを表します。`pass`は張り直した後に検証が通ることです。
+次の表は入退室8行、ヘッダーとトレーラーありの結果です。行の対象は2行目、切り落としは末尾2行です。`-`は残った行に不一致がなく、元のトレーラーだけが合わないことを表します。`pass`は作り直した後に検証が通ることです。
 
-| 操作ID | 操作 | 最初の不一致の行 | 張り直した後 |
+| 操作ID | 操作 | 最初の不一致の行 | 作り直した後 |
 |---|---|---|---|
 | `rewrite` | 書き換え | 2 | pass |
 | `delete` | 削除 | 2 | pass |
@@ -92,7 +92,7 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 | `header` | ヘッダーの書き換え | 1 | pass |
 | `rehashOne` | 書き換えた行だけ再計算 | 3 | pass |
 
-トレーラーがなければ末尾2行の削除は通ります。最後の行だけを書き換えて再計算した場合も、トレーラーがなければ通ります。ヘッダーを鎖に入れなければ、ヘッダーの変更は検出しません。同じ検証結果になる操作があるため、改変の種類は推定しません。
+トレーラーがなければ末尾2行の削除は通ります。最後の行だけを書き換えて再計算した場合も、トレーラーがなければ通ります。ヘッダーをチェーンに入れなければ、ヘッダーの変更は検出しません。同じ検証結果になる操作があるため、改変の種類は推定しません。
 
 次の○は改変が見つかる、×は見つからないことを表します。控えは別の人が保持し、時刻認証では検証者が閉じた時刻を記録とは別に知っている前提です。
 
@@ -104,7 +104,7 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 | `signature` | ECDSA P-256署名 | ○ | × |
 | `timestamp` | 仮の時刻認証 | ○ | ○ |
 
-守りの16通りの組み合わせも選べます。たとえばHMACと署名だけなら記録係の張り直しは通りますが、独立した控えを追加すると見つかります。
+守りの16通りの組み合わせも選べます。たとえばHMACと署名だけなら記録係の作り直しは通りますが、独立した控えを追加すると見つかります。
 
 ## 🎯 ユースケース
 
@@ -118,10 +118,10 @@ Hash Chain Tamper Trainerは、ハッシュチェーンで何が見つかり、�
 
 ## ⚠️ 制約と前提
 
-作り方が公開されていれば、誰でも鎖を張り直せます。ハッシュチェーンだけでは改ざんの証明にならないことを、この教材で確認します。
+作り方が公開されていれば、誰でもチェーンを作り直せます。ハッシュチェーンだけでは改ざんの証明にならないことを、この教材で確認します。
 
 - 控えを持つ人と改変する人が同じなら、控えも置き換えられる
-- HMACは鍵を持つ人だけが検証できる。鍵を渡すと、その人も張り直せる
+- HMACは鍵を持つ人だけが検証できる。鍵を渡すと、その人も作り直せる
 - 署名の秘密鍵を持つ記録係は、新しい先端に署名し直せる
 - 時刻認証が示すのは先端が存在した時刻であり、中身の正しさではない
 - 仮の認証局はページ内の鍵で署名する再現。本物の認証局の秘密鍵は利用者の手元にない
@@ -161,7 +161,7 @@ CSPの`connect-src 'none'`で通信を制限し、DOMは`textContent`と`createE
 - [FIPS 180-4 — Secure Hash Standard](https://doi.org/10.6028/NIST.FIPS.180-4)
 - [RFC 4231 — HMAC-SHA test vectors](https://www.rfc-editor.org/rfc/rfc4231)
 
-- [Day041 Mic Gain Logger](https://ipusiron.github.io/mic-gain-logger/)：張り直しを実証した事例。[CSVの説明](https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md)
+- [Day041 Mic Gain Logger](https://ipusiron.github.io/mic-gain-logger/)：作り直しを実証した事例。[CSVの説明](https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md)
 - [Day002 Hash Identifier](https://ipusiron.github.io/hash-detector/)：ハッシュ文字列の形式から候補を調べるツール
 - [Day053 JWT Inspector](https://ipusiron.github.io/jwt-inspector/)：JWTの構造と署名を学ぶツール
 
@@ -191,21 +191,21 @@ hash-chain-tamper-trainer/   # 教材のルート
 ├── README.md                # 日本語の説明
 ├── app.js                   # 画面と操作
 ├── assets/                  # 日本語の画面例
-│   ├── chain.png            # 鎖の表示
+│   ├── chain.png            # チェーンの表示
 │   ├── en/                  # 英語の画面例
-│   │   ├── chain.png        # 鎖の表示
+│   │   ├── chain.png        # チェーンの表示
 │   │   └── protections.png  # 守りと役割の表
 │   ├── protections.png      # 守りと役割の表
 │   └── tamper.png           # 改変の検証結果
-├── chain-core.js            # 鎖と暗号の計算
+├── chain-core.js            # チェーンと暗号の計算
 ├── index.html               # 5タブの構造
 ├── messages.js              # 日英の文言
 ├── package.json             # テストのコマンド
 ├── samples.js               # 架空のサンプル2種
 ├── style.css                # 配置と明暗の配色
 └── test/                    # 自動テスト
-    ├── chain-vectors.json   # 独立した鎖の期待値
-    ├── chain.test.js        # 鎖と改変の検査
+    ├── chain-vectors.json   # 独立したチェーンの期待値
+    ├── chain.test.js        # チェーンと改変の検査
     ├── contrast.test.js     # コントラストの検査
     ├── html.test.js         # HTMLとCSPの検査
     ├── i18n.test.js         # 辞書と文体の検査

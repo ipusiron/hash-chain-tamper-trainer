@@ -42,3 +42,13 @@ test('Claims do not present the tool as tamper prevention or proof', () => {
     assert.doesNotMatch(value, /改ざんを防ぐ|改ざん防止|改ざんの証明(?!にならない)/, key);
   }
 });
+
+test('Japanese prose consistently uses chain and rebuilding terminology', () => {
+  for (const [key, value] of Object.entries(messages.ja)) {
+    if (/^quote\.[12]$/.test(key)) continue;
+    assert.doesNotMatch(value, /鎖|張り直|prev/, key);
+  }
+  assert.doesNotMatch(read('README.md'), /鎖|張り直|prev/);
+  assert.ok(messages.ja.rechain.includes('後ろのハッシュをすべて計算し直す（作り直す）'));
+  assert.ok(messages.ja['lesson.10.table.1.b'].includes('「前のハッシュ|項目」'));
+});
