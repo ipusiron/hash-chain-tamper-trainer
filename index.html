@@ -73,8 +73,20 @@
       </details>
       <p data-i18n="checkpointNote"></p><p data-i18n="hmacNote"></p><p data-i18n="timeNote"></p><p class="privacy" data-i18n="simulationNote"></p>
     </section>
-    <section id="panel-learn" role="tabpanel" aria-labelledby="tab-learn" hidden><h2 data-i18n="tab.learn"></h2><p data-i18n="pending"></p></section>
-    <section id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden><h2 data-i18n="tab.quiz"></h2><p data-i18n="pending"></p></section>
+    <section id="panel-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
+      <h2 data-i18n="tab.learn"></h2>
+      <label for="lesson-select" data-i18n="lesson.choose"></label><select id="lesson-select"></select>
+      <div class="actions"><button id="lesson-previous" data-i18n="lesson.previous"></button><button id="lesson-next" data-i18n="lesson.next"></button><button id="back-to-quiz" data-i18n="quiz.back" hidden></button></div>
+      <article id="lesson-content"></article>
+      <button id="lesson-try" data-i18n="lesson.try"></button>
+    </section>
+    <section id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+      <h2 data-i18n="tab.quiz"></h2>
+      <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
+      <h3 id="quiz-prompt"></h3><div id="quiz-choices" class="quiz-choices"></div>
+      <div id="quiz-feedback" aria-live="polite"></div>
+      <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
+    </section>
   </main>
   <footer><p data-i18n="privacy"></p><p data-i18n="author"></p><a href="https://github.com/ipusiron/hash-chain-tamper-trainer" target="_blank" rel="noopener noreferrer" data-i18n="repository"></a></footer>
 </body>

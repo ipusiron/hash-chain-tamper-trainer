@@ -52,3 +52,33 @@ test('External links match the allowlist and isolate opened tabs', () => {
     assert.match(attrs, /target="_blank"/);
   }
 });
+
+test('Dynamic reference links match the exact approved list in both languages', () => {
+  const messages = require('../messages.js');
+  const allowed = [
+  "https://www.cyberghostvpn.com/en_US/glossary/hash-chain",
+  "https://doi.org/10.1007/BF00196791",
+  "https://doi.org/10.1007/3-540-38424-3_32",
+  "https://www.usenix.org/conference/7th-usenix-security-symposium/cryptographic-support-secure-logs-untrusted-machines",
+  "https://doi.org/10.1145/317087.317089",
+  "https://www.usenix.org/conference/usenixsecurity09/technical-sessions/presentation/efficient-data-structures-tamper-evident",
+  "https://doi.org/10.1145/358790.358797",
+  "https://www.rfc-editor.org/rfc/rfc1760",
+  "https://www.rfc-editor.org/rfc/rfc2289",
+  "https://www.rfc-editor.org/rfc/rfc3161",
+  "https://www.rfc-editor.org/rfc/rfc5816",
+  "https://www.rfc-editor.org/rfc/rfc6962",
+  "https://www.rfc-editor.org/rfc/rfc9162",
+  "https://git-scm.com/book/en/v2/Git-Internals-Git-Objects",
+  "https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History",
+  "https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md",
+  "https://doi.org/10.6028/NIST.FIPS.180-4",
+  "https://www.rfc-editor.org/rfc/rfc4231"
+];
+  for (const lang of ['ja','en']) {
+    const urls = Object.entries(messages[lang]).filter(([key]) => /^reference\.\d+\.url$/.test(key)).map(([,value])=>value);
+    assert.deepEqual(urls.sort(), allowed.slice().sort());
+  }
+  assert.match(app, /link\.rel = 'noopener noreferrer'/);
+  assert.match(app, /link\.target = '_blank'/);
+});

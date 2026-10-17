@@ -5,6 +5,10 @@
   const messages = window.HashChainMessages;
   const $ = id => document.getElementById(id);
   const tabs = ['build', 'tamper', 'protect', 'learn', 'quiz'];
+  const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
+  const quizAnswers = [1, 2, 0, 1, 2, 0, 1, 2];
+  const quizLessons = [5, 3, 6, 6, 1, 2, 7, 8];
+  const lessonReferences = [[16], [], [], [3,4,15], [0], [15], [1,2,5,9,10], [6,7,8], [11,12,13,14], [15], Array.from({length:18}, (_, i) => i)];
   let stored;
   try { stored = localStorage.getItem('hash-chain-tamper-trainer.lang'); } catch (_) { /* Optional storage. */ }
   const query = new URLSearchParams(location.search).get('lang');
@@ -234,6 +238,7 @@
       renderResult($('rechain-result'), state.rechained);
       renderMatrix();
     }
+    renderLearning();
     if (state.error) $('error').textContent = t('error.' + state.error);
   }
 
@@ -361,6 +366,112 @@
     state.matrix = await core.comparison({headers:state.base.headers, rows:state.base.rows.map(row => row.fields)}, state.selected, options());
   }));
   $('role-select').addEventListener('change', renderMatrix);
+
+  function renderLearning() {
+    replaceOptions($('lesson-select'), lessonRows.map((_, i) => [i, t('lesson.' + (i + 1) + '.title')]));
+    $('lesson-select').value = String(state.lesson);
+    $('back-to-quiz').hidden = state.returnQuestion === null;
+    const content = $('lesson-content');
+    const prefix = 'lesson.' + (state.lesson + 1);
+    content.replaceChildren(node('h3', t(prefix + '.title')), node('p', t(prefix + '.body')));
+    if (state.lesson === 4) {
+      for (const key of ['quote.1','quote.2']) {
+        const quote = node('blockquote', t(key));
+        quote.lang = 'en';
+        content.append(quote);
+      }
+      content.append(node('p', t('quote.summary')));
+    }
+    const table = node('table');
+    const thead = node('thead');
+    const tbody = node('tbody');
+    for (let i = 0; i < lessonRows[state.lesson]; i += 1) {
+      const tr = node('tr');
+      for (const column of ['a','b']) {
+        const cell = node(i === 0 ? 'th' : 'td', t(prefix + '.table.' + i + '.' + column));
+        if (i === 0) cell.scope = 'col';
+        tr.append(cell);
+      }
+      (i === 0 ? thead : tbody).append(tr);
+    }
+    table.append(thead, tbody);
+    content.append(table);
+    const links = node('ul');
+    lessonReferences[state.lesson].forEach(index => {
+      const li = node('li');
+      const link = node('a', t('reference.' + index + '.title'));
+      link.href = t('reference.' + index + '.url');
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      li.append(link);
+      links.append(li);
+    });
+    content.append(links);
+    replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1})]));
+    $('question-select').value = String(state.question);
+    const questionPrefix = 'quiz.' + (state.question + 1);
+    $('quiz-prompt').textContent = t(questionPrefix + '.prompt');
+    $('quiz-choices').replaceChildren();
+    for (let i = 0; i < 3; i += 1) {
+      const button = node('button', t(questionPrefix + '.choice.' + i));
+      button.type = 'button';
+      button.dataset.choice = String(i);
+      button.setAttribute('aria-pressed', String(state.answers[state.question] === i));
+      button.addEventListener('click', () => {
+        state.answers[state.question] = i;
+        renderLearning();
+        document.querySelector('#quiz-choices [data-choice="' + i + '"]').focus();
+      });
+      $('quiz-choices').append(button);
+    }
+    $('quiz-feedback').replaceChildren();
+    const answered = Object.hasOwn(state.answers, state.question);
+    if (answered) {
+      const correct = state.answers[state.question] === quizAnswers[state.question];
+      $('quiz-feedback').dataset.correct = String(correct);
+      $('quiz-feedback').className = 'result ' + (correct ? 'good' : 'bad');
+      $('quiz-feedback').append(node('p', t(correct ? 'quiz.correct' : 'quiz.incorrect')),
+        node('p', t(questionPrefix + '.explanation')));
+    } else {
+      $('quiz-feedback').className = '';
+      delete $('quiz-feedback').dataset.correct;
+    }
+  }
+
+  $('lesson-select').addEventListener('change', () => {
+    state.lesson = Number($('lesson-select').value);
+    renderLearning();
+  });
+  for (const [id, increment] of [['lesson-previous', -1], ['lesson-next', 1]]) {
+    $(id).addEventListener('click', () => {
+      state.lesson = (state.lesson + increment + lessonRows.length) % lessonRows.length;
+      renderLearning();
+    });
+  }
+  $('question-select').addEventListener('change', () => {
+    state.question = Number($('question-select').value);
+    renderLearning();
+  });
+  $('quiz-related').addEventListener('click', () => {
+    state.returnQuestion = state.question;
+    state.lesson = quizLessons[state.question];
+    renderLearning();
+    showTab('learn');
+    $('lesson-select').focus();
+  });
+  $('back-to-quiz').addEventListener('click', () => {
+    if (state.returnQuestion !== null) state.question = state.returnQuestion;
+    state.returnQuestion = null;
+    renderLearning();
+    showTab('quiz');
+    $('question-select').focus();
+  });
+  $('quiz-reset').addEventListener('click', () => {
+    delete state.answers[state.question];
+    renderLearning();
+  });
+  $('lesson-try').addEventListener('click', () => showTab('protect', true));
+
   localize();
   if (!window.crypto || !window.crypto.subtle) {
     state.error = 'cryptoUnavailable';
