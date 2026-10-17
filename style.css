@@ -319,3 +319,9 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
   .stage-flow { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .chain-row summary { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 }
+
+.prerequisite { background: var(--surface); border-inline-start: 4px solid var(--accent); padding: 0.75rem 1rem; }
+.prerequisite h4 { margin-block: 0; }
+.related-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.lesson-points { padding-inline-start: 1.5rem; }
+.lesson-points li { margin-block: 0.65rem; }

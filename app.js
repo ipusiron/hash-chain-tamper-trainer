@@ -6,6 +6,7 @@
   const $ = id => document.getElementById(id);
   const tabs = ['guide', 'free', 'learn'];
   const freeTabs = ['build', 'tamper', 'protect'];
+  const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
   const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
   const quizAnswers = [1, 2, 0, 1, 2, 0, 1, 2];
   const quizLessons = [5, 3, 6, 6, 1, 2, 7, 8];
@@ -394,7 +395,27 @@
     $('back-to-guide').hidden = state.returnGuide === null;
     const content = $('lesson-content');
     const prefix = 'lesson.' + (state.lesson + 1);
-    content.replaceChildren(node('h3', t(prefix + '.title')), node('p', t(prefix + '.body')));
+    const prerequisite = node('aside',undefined,'prerequisite');
+    prerequisite.append(node('h4',t('lesson.prerequisite')),node('p',t(prefix + '.prerequisite')));
+    if (lessonTools[state.lesson].length) {
+      const tools = node('div',undefined,'related-tools');
+      tools.setAttribute('aria-label',t('lesson.relatedTools'));
+      lessonTools[state.lesson].forEach(day => {
+        const link = node('a',t('tool.' + day + '.title'));
+        link.href = t('tool.' + day + '.url');
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        tools.append(link);
+      });
+      prerequisite.append(tools);
+    }
+    content.replaceChildren(node('h3', t(prefix + '.title')),prerequisite);
+    const paragraphs = t(prefix + '.body').split('\n');
+    content.append(node('p',paragraphs[0]));
+    const points = node('ul',undefined,'lesson-points');
+    paragraphs.slice(1).forEach(text => points.append(node('li',text)));
+    content.append(points);
+    if (state.lesson === 7) content.append(node('p',t('lesson.8.distinction'),'privacy'));
     if (state.lesson === 4) {
       for (const key of ['quote.1','quote.2']) {
         const quote = node('blockquote', t(key));
