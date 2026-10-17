@@ -25,6 +25,8 @@ const roots = [lightBlock, darkBlock].map(block => {
 const palettes = roots.map(([, body]) => Object.fromEntries([...body.matchAll(/--([\w-]+):\s*(#[0-9a-f]{6});/g)]
   .map(([, name, color]) => [name, color])));
 const pairs = [
+  ['fg', 'ok-bg', 4.5, 14.60, 12.13], ['muted', 'ok-bg', 4.5, 5.55, 6.30],
+  ['accent', 'ok-bg', 4.5, 8.37, 8.30],
   ['fg', 'bg', 4.5, 16.56, 15.67], ['muted', 'bg', 4.5, 6.29, 8.13],
   ['fg', 'surface', 4.5, 15.29, 13.74], ['muted', 'surface', 4.5, 5.81, 7.13],
   ['link', 'bg', 4.5, 9.49, 10.71], ['link', 'surface', 4.5, 8.76, 9.39],

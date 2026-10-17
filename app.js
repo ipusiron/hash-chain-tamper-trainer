@@ -5,7 +5,8 @@
   const messages = window.HashChainMessages;
   const $ = id => document.getElementById(id);
   const tabs = ['guide', 'free', 'learn', 'settings'];
-  const learning = window.HashChainLearning.create();
+  const learningModel = window.HashChainLearning;
+  const learning = learningModel.create();
   let learningNotice = '';
   const freeTabs = ['build', 'tamper', 'protect'];
   const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
@@ -393,21 +394,30 @@
   }));
   $('role-select').addEventListener('change', () => renderMatrix());
 
+  function relatedTools(lesson) {
+    const tools = node('div', undefined, 'related-tools');
+    tools.setAttribute('aria-label', t('lesson.relatedTools'));
+    for (const day of lessonTools[lesson]) {
+      const link = node('a', undefined, 'tool-link');
+      link.href = t('tool.' + day + '.url');
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(node('strong', t('tool.' + day + '.title')),
+        node('span', t('tool.open'), 'tool-link-action'));
+      const icon = node('span', '↗', 'tool-link-icon');
+      icon.setAttribute('aria-hidden', 'true');
+      link.append(icon);
+      tools.append(link);
+    }
+    return tools;
+  }
+
   function lessonPrerequisite(lesson) {
     const prefix = 'lesson.' + (lesson + 1);
     const prerequisite = node('aside',undefined,'prerequisite');
     prerequisite.append(node('h4',t('lesson.prerequisite')),node('p',t(prefix + '.prerequisite')));
     if (lessonTools[lesson].length) {
-      const tools = node('div',undefined,'related-tools');
-      tools.setAttribute('aria-label',t('lesson.relatedTools'));
-      lessonTools[lesson].forEach(day => {
-        const link = node('a',t('tool.' + day + '.title'));
-        link.href = t('tool.' + day + '.url');
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        tools.append(link);
-      });
-      prerequisite.append(tools);
+      prerequisite.append(relatedTools(lesson));
     }
     return prerequisite;
   }
@@ -453,6 +463,7 @@
       links.append(li);
     });
     content.append(links);
+    if (lessonTools[lesson].length) content.append(relatedTools(lesson));
   }
 
   function renderLearning() {
@@ -735,14 +746,22 @@
       section.dataset.sourceLesson = String(lesson + 1);
       section.append(node('h4',t('lesson.' + (lesson + 1) + '.title').replace(/^\d+\. /,'')));
       lessonBody(lesson,section);
+      understandingSection(section, 's' + step + '-lesson-' + (lesson + 1));
       explanation.append(section);
     }
     if (step === 2) explanation.prepend(node('p',t('guide.avalanche')));
     if (step === 7) {
-      explanation.append(node('p',t('guide.7.explanation')));
+      const review = node('section');
+      review.append(node('h4', t('guide.review')), node('p',t('guide.7.explanation')));
       for (const key of ['guide.3.learned','guide.4.learned','guide.5.learned','guide.6.learned']) {
-        explanation.append(node('p',t(key)));
+        review.append(node('p',t(key)));
       }
+      understandingSection(review, 's7-review');
+      explanation.append(review);
+    }
+    for (const [id, part] of [['guide-aim-section', 'aim'], ['guide-prerequisites', 'prerequisites'],
+      ['guide-task-section', 'task'], ['guide-observation-section', 'observation'], ['guide-takeaway', 'takeaway']]) {
+      understandingSection($(id), 's' + step + '-' + part);
     }
   }
 
@@ -825,37 +844,70 @@
     }
   }
 
+  function understandingSection(section, key) {
+    section.classList.add('learning-section');
+    section.dataset.learningKey = key;
+    let header = section.querySelector('.section-heading');
+    if (!header) {
+      const heading = section.querySelector('h3, h4');
+      header = node('div', undefined, 'section-heading');
+      heading.before(header);
+      const label = node('label', undefined, 'section-check');
+      const input = node('input');
+      input.type = 'checkbox';
+      input.addEventListener('change', () => {
+        learning.setChecked(section.dataset.learningKey, input.checked);
+        renderUnderstanding();
+      });
+      label.append(input, node('span'));
+      header.append(heading, label);
+    }
+    const input = header.querySelector('input');
+    input.id = 'understood-' + key;
+    input.setAttribute('aria-label', t('learning.checkNamed', {title:header.querySelector('h3, h4').textContent}));
+  }
+
   function renderUnderstanding() {
     const current = learning.snapshot();
-    const count = current.checked.filter(Boolean).length;
-    for (const id of ['guide-understood-count', 'settings-understood-count']) {
-      $(id).textContent = t('learning.count', {n:count});
-    }
-    $('guide-understood-check').checked = current.checked[guide.step - 1];
+    const count = current.checked.length;
+    const stepKeys = learningModel.SECTIONS[guide.step - 1];
+    $('guide-understood-count').textContent = t('learning.stepCount', {
+      n:stepKeys.filter(key => current.checked.includes(key)).length, total:stepKeys.length});
+    $('settings-understood-count').textContent = t('learning.count', {n:count, total:learningModel.KEYS.length});
+    document.querySelectorAll('[data-learning-key]').forEach(section => {
+      const checked = current.checked.includes(section.dataset.learningKey);
+      section.classList.toggle('is-understood', checked);
+      const input = section.querySelector('.section-check input');
+      input.checked = checked;
+      input.disabled = false;
+      section.querySelector('.section-check span').textContent = t(checked ? 'learning.done' : 'learning.check');
+    });
     $('learning-save').checked = current.save;
-    for (const id of ['guide-understood-check', 'learning-save', 'learning-reset-cancel', 'learning-reset-apply']) {
+    for (const id of ['learning-save', 'learning-reset-cancel', 'learning-reset-apply']) {
       $(id).disabled = false;
     }
-    $('learning-reset').disabled = count === 0;
+    $('learning-reset').disabled = count === 0 && current.legacySteps.length === 0;
+    $('learning-legacy').hidden = current.legacySteps.length === 0;
+    $('learning-legacy').textContent = current.legacySteps.length ? t('learning.legacy', {steps:current.legacySteps.join(', ')}) : '';
     $('learning-save-status').textContent = t(current.save ? 'learning.savingOn' : 'learning.savingOff');
     $('learning-message').textContent = learningNotice ? t(learningNotice) : '';
-    $('learning-reset-question').textContent = t('learning.question', {n:count});
+    $('learning-reset-question').textContent = t('learning.question', {n:count}) +
+      (current.legacySteps.length ? ' ' + t('learning.clearLegacy') : '');
     $('learning-storage-warning').hidden = !current.error;
     $('learning-storage-warning').textContent = current.error ? t('learning.error.' + current.error) : '';
     for (let i = 1; i <= 7; i += 1) {
       const button = $('guide-step-' + i);
       const title = i + '. ' + t('guide.' + i + '.title');
-      button.textContent = (current.checked[i - 1] ? '✓ ' : '') + title;
-      button.setAttribute('aria-label', title + ' — ' + t(current.checked[i - 1] ? 'learning.done' : 'learning.unchecked'));
+      const keys = learningModel.SECTIONS[i - 1];
+      const n = keys.filter(key => current.checked.includes(key)).length;
+      const progress = t('learning.parts', {n, total:keys.length});
+      button.replaceChildren(node('span', (n === keys.length ? '✓ ' : '') + title), node('span', progress, 'step-check-count'));
+      button.setAttribute('aria-label', title + ' — ' + progress);
       if (i === guide.step) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     }
   }
 
-  $('guide-understood-check').addEventListener('change', event => {
-    learning.setChecked(guide.step, event.target.checked);
-    renderUnderstanding();
-  });
   $('learning-save').addEventListener('change', event => {
     learning.setSaving(event.target.checked);
     learningNotice = '';
