@@ -34,6 +34,7 @@
     const element = document.createElement(tag);
     if (text !== undefined) element.textContent = text;
     if (className) element.className = className;
+    if (tag === 'p' && text && text.includes('\n')) element.classList.add('multiline');
     return element;
   }
 
@@ -92,7 +93,10 @@
   function localize() {
     document.documentElement.lang = language;
     document.title = t('title');
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+      if (el.tagName === 'P') el.classList.toggle('multiline', el.textContent.includes('\n'));
+    });
     document.querySelectorAll('[data-i18n-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nLabel)); });
     replaceOptions($('sample-select'), samples.map((item, i) => [i, t(item.labelKey)]));
     replaceOptions($('operation'), core.OPERATIONS.map(operation => [operation, t('op.' + operation)]));
@@ -432,6 +436,7 @@
     const points = node('ul',undefined,'lesson-points');
     paragraphs.slice(1).forEach(text => points.append(node('li',text)));
     content.append(points);
+    if (retainedLessons.includes(lesson)) content.append(lessonExample(lesson));
     if (lesson === 7) content.append(node('p',t('lesson.8.distinction'),'privacy'));
     if (lesson === 4) {
       for (const key of ['quote.1','quote.2']) {
@@ -759,6 +764,180 @@
     return figure;
   }
 
+  function visualFigure(key, values = {}) {
+    const figure = node('figure', undefined, 'lesson-visual');
+    figure.append(node('figcaption', t(key, values)));
+    return figure;
+  }
+
+  function visualCard(title, value, note) {
+    const card = node('div', undefined, 'visual-card');
+    card.append(node('strong', title, 'visual-label'));
+    if (value !== undefined) card.append(typeof value === 'string' ? node('code', value, 'visual-value') : value);
+    if (note) card.append(node('p', note));
+    return card;
+  }
+
+  function visualHash(hash) {
+    const code = node('code', undefined, 'visual-hash');
+    for (let i = 0; i < hash.length; i += 8) {
+      code.append(node(i === 0 ? 'strong' : 'span', hash.slice(i, i + 8)));
+    }
+    return code;
+  }
+
+  function hashDisplayExample() {
+    if (!guide.partial) return node('div');
+    const hash = guide.partial.seed;
+    const figure = visualFigure('visual.display.title');
+    const pair = node('div', undefined, 'visual-grid');
+    const short = node('code', undefined, 'visual-short');
+    short.append(node('strong', hash.slice(0, 8)), node('span', '\u2026'));
+    pair.append(visualCard(t('visual.display.short'), short, t('visual.display.omitted')),
+      visualCard(t('visual.display.full'), visualHash(hash), t('visual.display.match')));
+    figure.append(pair, node('p', t('visual.display.note'), 'visual-conclusion'));
+    return figure;
+  }
+
+  function visualRows(result, title, removed = 0) {
+    const block = node('div', undefined, 'visual-row-group');
+    block.append(node('strong', title, 'visual-label'));
+    const list = node('ol', undefined, 'visual-rows');
+    const count = result ? result.rows.length : samples[0].rows.length;
+    for (let i = 0; i < count; i += 1) {
+      const gone = i >= count - removed;
+      const valid = result ? result.rows[i].valid : null;
+      const status = gone ? 'removed' : valid === null ? 'retained' : valid ? 'pass' : 'fail';
+      const li = node('li', undefined, 'visual-row visual-' + status);
+      li.dataset.row = String(i + 1);
+      li.dataset.status = status;
+      li.append(node('span', t('visual.row', {n:i + 1})),
+        node('strong', t('visual.status.' + status)));
+      list.append(li);
+    }
+    block.append(list);
+    return block;
+  }
+
+  function guideVisual() {
+    const step = guide.step;
+    const figure = visualFigure('visual.step.' + step);
+    figure.dataset.step = String(step);
+    if (step === 1 && guide.partial) {
+      const chain = guide.partial;
+      const n = guide.shown;
+      const flow = node('div', undefined, 'visual-calculation');
+      let input;
+      let hash;
+      if (n === 0) {
+        input = chain.headers.join('\n');
+        hash = chain.seed;
+        flow.append(visualCard(t('visual.headerInput'), input, t('visual.headerNote')));
+      } else {
+        const previous = n === 1 ? chain.seed : chain.rows[n - 2].hash;
+        const row = chain.rows[n - 1];
+        input = core.hashInput(previous, row.fields);
+        hash = row.hash;
+        const parts = node('div', undefined, 'visual-input-parts');
+        parts.append(visualCard(t('visual.previousFull'), visualHash(previous)),
+          visualCard(t('visual.separator'), '|'),
+          visualCard(t('visual.currentRecord', {n}), row.fields.join(',')));
+        flow.append(visualCard(t('visual.input'), parts, t('visual.joinNote')));
+      }
+      flow.append(visualCard(t('visual.calculate'), 'SHA-256', t('visual.encoding')),
+        visualCard(t(n ? 'visual.outputRow' : 'visual.outputSeed', {n}), visualHash(hash)));
+      const exact = node('details', undefined, 'visual-exact');
+      exact.append(node('summary', t('visual.exact')), node('code', input, 'visual-exact-input'));
+      figure.append(flow, exact, node('p', t(n ? 'visual.next' : 'visual.seedNext', {n:n + 1}), 'visual-conclusion'));
+      if (n === samples[0].rows.length) {
+        figure.lastElementChild.textContent = t('visual.finish');
+        figure.append(visualCard(t('visual.trailerInput'), core.trailerInput(hash, n)),
+          visualCard(t('visual.trailerOutput'), visualHash(chain.trailer.hash)));
+      }
+      return figure;
+    }
+    if (step >= 2 && step <= 4) {
+      const before = samples[0].rows[1];
+      const after = guide.modified ? guide.modified.rows[1].fields : before.map((value, i) => i ? value : '09:06');
+      const pair = node('div', undefined, 'visual-grid');
+      pair.append(visualCard(t('visual.recordBefore'), before.join(',')),
+        visualCard(t('visual.recordAfter'), after.join(','), t('visual.changeTime')));
+      figure.append(pair);
+      const result = guide.results[step];
+      if (!result) {
+        figure.append(node('p', t('visual.plan.' + step), 'visual-conclusion'));
+        return figure;
+      }
+      if (step === 4) figure.append(visualRows(guide.results[3], t('visual.beforeRebuild')));
+      figure.append(visualRows(result, t('visual.actualResults')));
+      if (step < 4) {
+        const mismatch = result.rows[result.firstMismatch - 1];
+        const hashes = node('div', undefined, 'visual-grid');
+        hashes.append(visualCard(t('visual.expectedAt', {n:result.firstMismatch}), visualHash(mismatch.expected)),
+          visualCard(t('visual.storedAt', {n:result.firstMismatch}), visualHash(mismatch.actual)));
+        figure.append(hashes);
+      }
+      figure.append(node('p', t('visual.result.' + step), 'visual-conclusion'));
+      return figure;
+    }
+    if (step === 5) {
+      figure.append(visualRows(null, t('visual.cut'), 2));
+      const pair = node('div', undefined, 'visual-grid');
+      pair.append(visualCard(t('visual.originalCount'), 'rows=' + samples[0].rows.length), visualCard(t('visual.remainingCount'), 'rows=' + (samples[0].rows.length - 2)));
+      figure.append(pair);
+      if (guide.results[5]) {
+        const [without, withTrailer] = guide.results[5];
+        const results = node('div', undefined, 'visual-grid');
+        results.append(visualCard(t('guide.withoutTrailer'), t(without.valid ? 'pass' : 'fail'), t('visual.cutWithout')),
+          visualCard(t('guide.withTrailer'), t(withTrailer.valid ? 'pass' : 'fail'), t('visual.cutWith')));
+        figure.append(results);
+      }
+      figure.append(node('p', t('visual.cutLimit'), 'visual-conclusion'));
+      return figure;
+    }
+    if (step === 6) {
+      const roles = node('div', undefined, 'visual-grid visual-three');
+      for (const role of ['outsider', 'recorder', 'holder']) {
+        roles.append(visualCard(t('visual.role.' + role), undefined, t('visual.role.' + role + '.note')));
+      }
+      figure.append(roles);
+      if (guide.matrix) {
+        const selected = guide.matrix[guide.matrix.length - 1];
+        figure.append(node('p', t('visual.selected', {protections:selected.protections.length
+          ? selected.protections.map(value => t('protection.' + value)).join(' + ') : t('protection.none')})));
+        const results = node('div', undefined, 'visual-grid');
+        selected.results.forEach((result, i) => results.append(visualCard(t('role.' + (i ? 'recorder' : 'outsider')),
+          t(result.detected ? 'detected' : 'undetected'))));
+        figure.append(results);
+      }
+      figure.append(node('p', t('visual.rolesNote'), 'visual-conclusion'));
+      return figure;
+    }
+    if (step === 7) {
+      const prompts = node('ol', undefined, 'visual-prompts');
+      for (let i = 1; i <= 3; i += 1) {
+        const li = node('li');
+        li.append(node('strong', t('visual.question.' + i)), node('p', t('visual.question.' + i + '.note')));
+        prompts.append(li);
+      }
+      figure.append(prompts);
+    }
+    return figure;
+  }
+
+  function lessonExample(lesson) {
+    const figure = visualFigure('visual.lesson.' + (lesson + 1) + '.title');
+    const items = node('ol', undefined, 'visual-examples');
+    for (let i = 1; i <= 3; i += 1) {
+      const li = node('li');
+      const key = 'visual.lesson.' + (lesson + 1) + '.' + i;
+      li.append(visualCard(t(key + '.title'), t(key + '.value'), t(key + '.note')));
+      items.append(li);
+    }
+    figure.append(items, node('p', t('visual.lesson.' + (lesson + 1) + '.note'), 'visual-conclusion'));
+    return figure;
+  }
+
   function renderGuideExplanation() {
     const step = guide.step;
     $('guide-aim').textContent = t('guide.' + step + '.aim');
@@ -772,12 +951,13 @@
       background.append(content);
     }
     if (step === 1) {
-      background.append(node('p',t('guide.sample')),sampleIllustration(),node('p',t('guide.hashDisplay')));
+      background.append(node('p',t('guide.sample')),sampleIllustration(),node('p',t('guide.hashDisplay')),hashDisplayExample());
     }
     if (step === 2) background.append(node('p',t('guide.avalanche')));
     if (step === 7) background.append(node('p',t('guide.7.prerequisite')));
     $('guide-now').replaceChildren(...guideObservation().flatMap(({key, values}) =>
       messages[language][key].split('\n').map(template => observationParagraph(template, values))));
+    $('guide-visual').replaceChildren(guideVisual());
     const explanation = $('guide-explanation');
     explanation.replaceChildren();
     for (const lesson of guideSources[step - 1]) {
