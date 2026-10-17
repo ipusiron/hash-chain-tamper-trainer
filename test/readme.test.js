@@ -25,11 +25,11 @@ test('Readme headings and five badges follow the same complete order', () => {
     assert.doesNotMatch(doc,/^### /m);
   });
 });
-test('All five screenshots have captions, PNG dimensions and bounded sizes', () => {
+test('All seven screenshots have captions, PNG dimensions and bounded sizes', () => {
   const all=[];
   docs.forEach((doc,i) => {
     const images=[...doc.matchAll(/!\[([^\]]+)\]\((assets\/[^)]+)\)\n\n\*([^*]+)\*/g)];
-    assert.equal(images.length,i===0?3:2);
+    assert.equal(images.length,i===0?4:3);
     for(const [,alt,file,caption] of images) {
       assert.ok(alt && caption);
       const png=fs.readFileSync(path.join(root,file));
@@ -130,13 +130,23 @@ test('Related tools, known unverified coverage and developer commands are docume
   }
 });
 
-test('Both usage sections follow the seven steps and three entrances', () => {
+test('Both usage sections follow the seven steps and four entrances', () => {
   for (const [i,doc] of docs.entries()) {
     const usage = doc.split(i === 0 ? '## 📖 使い方' : '## 📖 Usage')[1].split('\n## ')[0];
     assert.deepEqual([...usage.matchAll(/^(\d)\. /gm)].map(m=>Number(m[1])),[1,2,3,4,5,6,7]);
-    for (const name of i===0 ? ['学習の流れ','自由に試す','座学'] : ['Learning path','Free experiment','Learn']) assert.ok(doc.includes(name));
+    for (const name of i===0 ? ['学習の流れ','自由に試す','座学','設定'] : ['Learning path','Free experiment','Learn','Settings']) assert.ok(doc.includes(name));
     assert.ok(usage.includes('09:05') && usage.includes('09:06'));
   }
+});
+
+test('Both readmes explain manual checks, scoped reset and the two storage keys', () => {
+  for (const doc of docs) {
+    for (const key of ['hash-chain-tamper-trainer.lang','hash-chain-tamper-trainer.learning']) assert.ok(doc.includes(key));
+  }
+  assert.match(docs[0], /理解チェックをすべて外す/);
+  assert.match(docs[0], /未チェックでも/);
+  assert.match(docs[1], /Clear all understanding checks/);
+  assert.match(docs[1], /without checking/);
 });
 
 test('Both readmes describe inline explanations, four advanced sections and reversible quiz destinations', () => {

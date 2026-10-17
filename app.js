@@ -4,7 +4,9 @@
   const samples = window.HashChainSamples;
   const messages = window.HashChainMessages;
   const $ = id => document.getElementById(id);
-  const tabs = ['guide', 'free', 'learn'];
+  const tabs = ['guide', 'free', 'learn', 'settings'];
+  const learning = window.HashChainLearning.create();
+  let learningNotice = '';
   const freeTabs = ['build', 'tamper', 'protect'];
   const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
   const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
@@ -64,6 +66,7 @@
       $('guide-next').disabled = guide.step === 7;
       $('guide-action').disabled = guide.step === 1 && guide.shown === 8;
     }
+    renderUnderstanding();
   }
 
   async function perform(action) {
@@ -250,6 +253,7 @@
   }
 
   function showTab(name, focus = false) {
+    if (name !== 'settings') $('learning-reset-confirm').hidden = true;
     if (name === 'quiz') {
       guide.step = 7;
       guide.quizOpen = true;
@@ -751,12 +755,7 @@
     $('guide-counter').textContent = t('guide.counter', {n:step});
     $('guide-progress').value = step;
     $('guide-progress').setAttribute('aria-label', t('guide.counter', {n:step}));
-    for (let i = 1; i <= 7; i += 1) {
-      const button = $('guide-step-' + i);
-      button.textContent = i + '. ' + t('guide.' + i + '.title');
-      if (i === step) button.setAttribute('aria-current', 'step');
-      else button.removeAttribute('aria-current');
-    }
+    renderUnderstanding();
     $('guide-back-to-quiz').hidden = state.returnQuestion === null || step === 7;
     $('guide-reset').hidden = step < 2 || step > 4;
     $('guide-options').hidden = step !== 6;
@@ -825,6 +824,64 @@
       for (const key of ['checkpointNote','hmacNote','timeNote','simulationNote']) output.append(node('p',t(key),key === 'simulationNote' ? 'privacy' : 'muted'));
     }
   }
+
+  function renderUnderstanding() {
+    const current = learning.snapshot();
+    const count = current.checked.filter(Boolean).length;
+    for (const id of ['guide-understood-count', 'settings-understood-count']) {
+      $(id).textContent = t('learning.count', {n:count});
+    }
+    $('guide-understood-check').checked = current.checked[guide.step - 1];
+    $('learning-save').checked = current.save;
+    for (const id of ['guide-understood-check', 'learning-save', 'learning-reset-cancel', 'learning-reset-apply']) {
+      $(id).disabled = false;
+    }
+    $('learning-reset').disabled = count === 0;
+    $('learning-save-status').textContent = t(current.save ? 'learning.savingOn' : 'learning.savingOff');
+    $('learning-message').textContent = learningNotice ? t(learningNotice) : '';
+    $('learning-reset-question').textContent = t('learning.question', {n:count});
+    $('learning-storage-warning').hidden = !current.error;
+    $('learning-storage-warning').textContent = current.error ? t('learning.error.' + current.error) : '';
+    for (let i = 1; i <= 7; i += 1) {
+      const button = $('guide-step-' + i);
+      const title = i + '. ' + t('guide.' + i + '.title');
+      button.textContent = (current.checked[i - 1] ? '✓ ' : '') + title;
+      button.setAttribute('aria-label', title + ' — ' + t(current.checked[i - 1] ? 'learning.done' : 'learning.unchecked'));
+      if (i === guide.step) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    }
+  }
+
+  $('guide-understood-check').addEventListener('change', event => {
+    learning.setChecked(guide.step, event.target.checked);
+    renderUnderstanding();
+  });
+  $('learning-save').addEventListener('change', event => {
+    learning.setSaving(event.target.checked);
+    learningNotice = '';
+    renderUnderstanding();
+  });
+  function closeLearningReset() {
+    $('learning-reset-confirm').hidden = true;
+    $('learning-reset').focus();
+  }
+  $('learning-reset').addEventListener('click', () => {
+    learningNotice = '';
+    renderUnderstanding();
+    $('learning-reset-confirm').hidden = false;
+    $('learning-reset-cancel').focus();
+  });
+  $('learning-reset-cancel').addEventListener('click', closeLearningReset);
+  $('learning-reset-confirm').addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); closeLearningReset(); }
+  });
+  $('learning-reset-apply').addEventListener('click', () => {
+    learning.reset();
+    $('learning-reset-confirm').hidden = true;
+    learningNotice = 'learning.cleared';
+    renderUnderstanding();
+    $('learning-settings-heading').focus();
+  });
 
   for (let i = 1; i <= 7; i += 1) {
     const li = node('li');
