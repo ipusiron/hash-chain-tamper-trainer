@@ -68,6 +68,10 @@ In Settings, "Save understanding checks in this browser" is on by default. Turni
 
 Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path.
 
+A side-by-side example connects the short display to all 64 characters, with the first 8 underlined. The calculation diagram separates the previous hash, separator and current record, and shows the actual input and output.
+
+Diagrams show the status of all 8 rows, tail deletion, and the people who hold keys or independent copies. All four advanced sections have worked examples, and explanatory prose is divided into paragraphs by topic.
+
 ## 🔬 Chain format and verification results
 
 The seed is SHA-256 of the header lines joined with LF. Excluding the header uses 64 zeros instead. Each row hashes `previousHash + '|' + fields.join(',')`; the trailer hashes `lastHash + '|rows=' + count`.
