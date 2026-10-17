@@ -612,48 +612,97 @@
 
   function shortHash(hash) { return hash.slice(0, 8) + '\u2026'; }
 
+  function observation(key, values = {}) { return {key, values}; }
+
+  function appendObservationProse(container, text) {
+    text.split(/(SHA-256)/g).forEach(part => container.append(part === 'SHA-256'
+      ? node('span', part, 'observation-token') : document.createTextNode(part)));
+  }
+
+  function observationParagraph(template, values) {
+    const paragraph = node('p');
+    const results = ['first', 'result', 'without', 'with', 'outsider', 'recorder'];
+    let cursor = 0;
+    for (const match of template.matchAll(/\{(\w+)\}/g)) {
+      appendObservationProse(paragraph, template.slice(cursor, match.index));
+      const name = match[1];
+      const value = String(values[name]);
+      if (/^[a-f0-9]{8}\u2026$/.test(value)) {
+        const emphasis = node('strong');
+        emphasis.append(node('code', value, 'observation-hash'));
+        paragraph.append(emphasis);
+      } else if (['record', 'before', 'after'].includes(name)) {
+        const record = node('code', undefined, 'observation-record');
+        value.split(',').forEach((field, index) => {
+          if (index) record.append(document.createTextNode(','), node('wbr'));
+          record.append(document.createTextNode(field));
+        });
+        paragraph.append(record);
+      } else if (results.includes(name)) {
+        paragraph.append(node('strong', value));
+      } else if (['time', 'room', 'card'].includes(name)) {
+        paragraph.append(node('span', value, 'observation-token'));
+      } else {
+        paragraph.append(document.createTextNode(value));
+      }
+      cursor = match.index + match[0].length;
+    }
+    appendObservationProse(paragraph, template.slice(cursor));
+    return paragraph;
+  }
+
+  function emphasizeTakeaway(container, step) {
+    const text = t('guide.' + step + '.learned');
+    const focus = t('guide.' + step + '.focus');
+    const index = text.indexOf(focus);
+    container.replaceChildren();
+    if (index < 0) { container.textContent = text; return; }
+    container.append(document.createTextNode(text.slice(0, index)), node('strong', focus),
+      document.createTextNode(text.slice(index + focus.length)));
+  }
+
   function guideObservation() {
     const step = guide.step;
     if (step === 1 && guide.partial) {
       const chain = guide.partial;
-      if (!guide.shown) return [t('guide.now.seed', {seed:shortHash(chain.seed)})];
+      if (!guide.shown) return [observation('guide.now.seed', {seed:shortHash(chain.seed)})];
       const n = guide.shown;
       const row = chain.rows[n - 1];
       const previous = n === 1 ? chain.seed : chain.rows[n - 2].hash;
       const [time, room, card, direction] = row.fields;
       const values = {n, record:row.fields.join(','), time, room, card,
         movement:t('guide.movement.' + direction), prior:shortHash(previous), hash:shortHash(row.hash)};
-      const text = [t('guide.now.row', values)];
-      if (n < samples[0].rows.length) text.push(t('guide.now.next', {n:n + 1, hash:shortHash(row.hash)}));
-      else text.push(t('guide.now.trailer', {count:n, tip:shortHash(row.hash), trailer:shortHash(chain.trailer.hash)}));
+      const text = [observation('guide.now.row', values)];
+      if (n < samples[0].rows.length) text.push(observation('guide.now.next', {n:n + 1, hash:shortHash(row.hash)}));
+      else text.push(observation('guide.now.trailer', {count:n, tip:shortHash(row.hash), trailer:shortHash(chain.trailer.hash)}));
       return text;
     }
     if ((step === 2 || step === 3) && guide.results[step]) {
       const result = guide.results[step];
-      return [t('guide.now.' + step, {first:result.firstMismatch, before:guide.base.rows[1].fields.join(','),
+      return [observation('guide.now.' + step, {first:result.firstMismatch, before:guide.base.rows[1].fields.join(','),
         after:guide.modified.rows[1].fields.join(','), old:shortHash(guide.base.rows[1].hash),
         hash:shortHash(guide.results[2].rows[1].expected),
         expected:shortHash(result.expected), actual:shortHash(result.actual)})];
     }
-    if (step === 4 && guide.results[4]) return [t('guide.now.4', {first:guide.results[3].firstMismatch,
+    if (step === 4 && guide.results[4]) return [observation('guide.now.4', {first:guide.results[3].firstMismatch,
       count:guide.results[4].rows.length, result:t(guide.results[4].valid ? 'pass' : 'fail'),
       tip:shortHash(core.tip(guide.rebuilt))})];
     if (step === 5 && guide.results[5]) {
       const [without, withTrailer] = guide.results[5];
-      return [t('guide.now.5', {count:without.rows.length, original:guide.base.rows.length,
+      return [observation('guide.now.5', {count:without.rows.length, original:guide.base.rows.length,
         without:t(without.valid ? 'pass' : 'fail'), with:t(withTrailer.valid ? 'pass' : 'fail'),
         expected:shortHash(withTrailer.expected), actual:shortHash(withTrailer.actual)})];
     }
-    if (step === 6 && guide.matrix) return guide.matrix.map((row, i) => t('guide.now.6', {
+    if (step === 6 && guide.matrix) return guide.matrix.map((row, i) => observation('guide.now.6', {
       protection:i === 5 ? t('protection.selected') : t('protection.' + (row.protections[0] || 'none')),
       outsider:t(row.results[0].detected ? 'detected' : 'undetected'),
       recorder:t(row.results[1].detected ? 'detected' : 'undetected')}));
     if (step === 7 && guide.quizOpen) {
       const answered = Object.hasOwn(state.answers, state.question);
-      return [t('guide.now.7', {count:Object.keys(state.answers).length, total:quizAnswers.length, n:state.question + 1,
+      return [observation('guide.now.7', {count:Object.keys(state.answers).length, total:quizAnswers.length, n:state.question + 1,
         result:answered ? t(state.answers[state.question] === quizAnswers[state.question] ? 'quiz.correct' : 'quiz.incorrect') : t('guide.unanswered')})];
     }
-    return [t('guide.waiting')];
+    return [observation('guide.waiting')];
   }
 
   function renderGuideExplanation() {
@@ -673,7 +722,8 @@
     }
     if (step === 2) background.append(node('p',t('guide.avalanche')));
     if (step === 7) background.append(node('p',t('guide.7.prerequisite')));
-    $('guide-now').replaceChildren(...guideObservation().map(text => node('p',text)));
+    $('guide-now').replaceChildren(...guideObservation().flatMap(({key, values}) =>
+      messages[language][key].split('\n').map(template => observationParagraph(template, values))));
     const explanation = $('guide-explanation');
     explanation.replaceChildren();
     for (const lesson of guideSources[step - 1]) {
@@ -715,7 +765,7 @@
     $('guide-prepared').hidden = !guide.prepared || step < 2 || step > 4;
     const done = step === 1 ? guide.shown > 0 : step === 6 ? !!guide.matrix : step === 7 ? Object.keys(state.answers).length > 0 : !!guide.results[step];
     $('guide-takeaway').hidden = !done;
-    $('guide-understood').textContent = t('guide.' + step + '.learned');
+    emphasizeTakeaway($('guide-understood'), step);
     const output = $('guide-result');
     output.replaceChildren();
     if (step === 1 && guide.partial) {

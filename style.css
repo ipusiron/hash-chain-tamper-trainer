@@ -326,7 +326,11 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .guide-aim, .guide-observation, .guide-mechanism { margin-block: 1.5rem; }
 .guide-observation { padding: 0.75rem 1rem; border-inline-start: 4px solid var(--accent); background: var(--surface); overflow-wrap: anywhere; }
 .guide-observation h3 { margin-block-start: 0; }
-.guide-observation p { max-width: 72ch; }
+.guide-observation p { line-break: strict; word-break: normal; overflow-wrap: normal; }
+.observation-hash, .observation-token { white-space: nowrap; }
+.observation-hash { font-size: 1em; font-weight: inherit; }
+.observation-record { white-space: normal; overflow-wrap: anywhere; }
+.guide-observation strong, .takeaway strong { color: var(--accent); font-weight: 700; }
 .guide-mechanism { border-block-start: 1px solid var(--border); padding-block-start: 0.5rem; }
 .guide-mechanism section + section { margin-block-start: 1.5rem; }
 .related-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; }
