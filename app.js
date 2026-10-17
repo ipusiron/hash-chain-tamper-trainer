@@ -9,7 +9,8 @@
   const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
   const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
   const quizAnswers = [1, 2, 0, 1, 2, 0, 1, 2];
-  const quizLessons = [5, 3, 6, 6, 1, 2, 7, 8];
+  const retainedLessons = [7, 8, 9, 10];
+  const quizDestinations = [{"step":4}, {"step":5}, {"step":6}, {"step":6}, {"step":1}, {"step":3}, {"lesson":7}, {"lesson":8}];
   const lessonReferences = [[16], [], [], [3,4,15], [0], [15], [1,2,5,9,10], [6,7,8], [11,12,13,14], [15], Array.from({length:18}, (_, i) => i)];
   let stored;
   try { stored = localStorage.getItem('hash-chain-tamper-trainer.lang'); } catch (_) { /* Optional storage. */ }
@@ -18,7 +19,7 @@
     .find(value => value === 'ja' || value === 'en');
   const state = { base: null, working: null, verified: null, shown: null, completed: 0,
     matrix: null, rechained: null, changed: false, busy: false, error: null,
-    selected: [], active: 'guide', answers: {}, lesson: 0, question: 0, returnQuestion: null, freeActive: 'build' };
+    selected: [], active: 'guide', answers: {}, lesson: 7, question: 0, returnQuestion: null, freeActive: 'build' };
 
   function t(key, values = {}) {
     const text = messages[language][key];
@@ -451,12 +452,12 @@
   }
 
   function renderLearning() {
-    replaceOptions($('lesson-select'), lessonRows.map((_, i) => [i, t('lesson.' + (i + 1) + '.title')]));
+    replaceOptions($('lesson-select'), retainedLessons.map(i => [i, t('lesson.' + (i + 1) + '.title').replace(/^\d+\. /,'')]));
     $('lesson-select').value = String(state.lesson);
     $('back-to-quiz').hidden = state.returnQuestion === null;
     const content = $('lesson-content');
     const prefix = 'lesson.' + (state.lesson + 1);
-    content.replaceChildren(node('h3', t(prefix + '.title')),lessonPrerequisite(state.lesson));
+    content.replaceChildren(node('h3', t(prefix + '.title').replace(/^\d+\. /,'')),$('back-to-quiz'),lessonPrerequisite(state.lesson));
     lessonBody(state.lesson, content);
     replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1})]));
     $('question-select').value = String(state.question);
@@ -496,7 +497,7 @@
   });
   for (const [id, increment] of [['lesson-previous', -1], ['lesson-next', 1]]) {
     $(id).addEventListener('click', () => {
-      state.lesson = (state.lesson + increment + lessonRows.length) % lessonRows.length;
+      state.lesson = retainedLessons[(retainedLessons.indexOf(state.lesson) + increment + retainedLessons.length) % retainedLessons.length];
       renderLearning();
     });
   }
@@ -506,18 +507,28 @@
   });
   $('quiz-related').addEventListener('click', () => {
     state.returnQuestion = state.question;
-    state.lesson = quizLessons[state.question];
-    renderLearning();
-    showTab('learn');
-    $('lesson-select').focus();
+    const destination = quizDestinations[state.question];
+    if (destination.step) {
+      chooseGuide(destination.step);
+      $('guide-mechanism').focus({preventScroll:true});
+      $('guide-mechanism').scrollIntoView({block:'start'});
+    } else {
+      state.lesson = destination.lesson;
+      renderLearning();
+      showTab('learn');
+      $('lesson-content').focus({preventScroll:true});
+      $('lesson-content').scrollIntoView({block:'start'});
+    }
   });
-  $('back-to-quiz').addEventListener('click', () => {
+  function returnToQuiz() {
     if (state.returnQuestion !== null) state.question = state.returnQuestion;
     state.returnQuestion = null;
     renderLearning();
     showTab('quiz');
     $('question-select').focus();
-  });
+  }
+  $('back-to-quiz').addEventListener('click', returnToQuiz);
+  $('guide-back-to-quiz').addEventListener('click', returnToQuiz);
   $('quiz-reset').addEventListener('click', () => {
     delete state.answers[state.question];
     renderLearning();
@@ -696,6 +707,7 @@
       if (i === step) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     }
+    $('guide-back-to-quiz').hidden = state.returnQuestion === null || step === 7;
     $('guide-reset').hidden = step < 2 || step > 4;
     $('guide-options').hidden = step !== 6;
     $('guide-quiz').hidden = step !== 7 || !guide.quizOpen;

@@ -24,7 +24,7 @@ test('Eight questions each provide three choices and an explanation', () => {
     }
   }
   assert.deepEqual(JSON.parse(/const quizAnswers = (\[[^;]+\]);/.exec(app)[1]), [1,2,0,1,2,0,1,2]);
-  assert.deepEqual(JSON.parse(/const quizLessons = (\[[^;]+\]);/.exec(app)[1]), [5,3,6,6,1,2,7,8]);
+  assert.deepEqual(JSON.parse(/const quizDestinations = (\[[^;]+\]);/.exec(app)[1]), [{step:4},{step:5},{step:6},{step:6},{step:1},{step:3},{lesson:7},{lesson:8}]);
 });
 test('The supplied excerpts and their Japanese summary remain attributed', () => {
   assert.equal(messages.ja['quote.1'],'altering any part of the data would necessitate changing all subsequent hash values');
@@ -75,4 +75,27 @@ test('Step one explanation templates include the calculated seed, first row and 
   for (const value of ['7b4b04ae…','e70fd1bc…','09:02,Room-A,C-1001,IN']) assert.ok(row.includes(value));
   const trailer = fill('guide.now.trailer',{count:8,tip:short(core.tip(chain)),trailer:short(chain.trailer.hash)});
   assert.ok(trailer.includes('rows=8') && trailer.includes(short(chain.trailer.hash)));
+});
+
+test('The Learn entrance retains exactly four advanced and reference sections', () => {
+  const retained = JSON.parse(/const retainedLessons = (\[[^;]+\]);/.exec(app)[1]);
+  assert.deepEqual(retained,[7,8,9,10]);
+  for (const lang of ['ja','en']) for (const index of retained) {
+    assert.ok(messages[lang][`lesson.${index+1}.title`]);
+    assert.ok(messages[lang][`lesson.${index+1}.prerequisite`]);
+    assert.ok(messages[lang][`lesson.${index+1}.body`]);
+  }
+  assert.match(app,/Array.from\(\{length:18\}/);
+});
+test('All eight quiz destinations exist and both destinations expose a return control', () => {
+  const destinations = JSON.parse(/const quizDestinations = (\[[^;]+\]);/.exec(app)[1]);
+  assert.equal(destinations.length,8);
+  for (const [i,destination] of destinations.entries()) {
+    if(i<6) assert.ok(messages.ja[`guide.${destination.step}.aim`]);
+    else assert.ok([7,8].includes(destination.lesson));
+  }
+  const html = fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  for (const id of ['back-to-quiz','guide-back-to-quiz']) assert.ok(html.includes(`id="${id}"`));
+  assert.match(html, /id="guide-mechanism"[^>]*tabindex="-1"/);
+  assert.match(html, /id="lesson-content" tabindex="-1"/);
 });
