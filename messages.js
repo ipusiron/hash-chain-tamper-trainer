@@ -473,7 +473,19 @@
     "guide.4.aim": "後ろを全部作り直すと検証が通ることを確かめます。検証に何が必要かを、計算できる人と控えの置き場所から考えます。",
     "guide.5.aim": "記録の末尾が消えたとき、終わりを示すトレーラーの有無で結果が変わることを確かめます。",
     "guide.6.aim": "控えと鍵の持ち方によって、第三者と記録係本人の結果がどう違うかを確かめます。",
-    "guide.7.aim": "8問を解いて、ハッシュチェーンと守りが見つけられる変更を説明できるか確かめます。"
+    "guide.7.aim": "8問を解いて、ハッシュチェーンと守りが見つけられる変更を説明できるか確かめます。",
+    "guide.sampleFigure.title": "入室のできごとを1行の記録にする",
+    "guide.sampleFigure.alt": "カードを使って部屋に入る人物のイラスト",
+    "guide.sampleFigure.field.0": "時刻",
+    "guide.sampleFigure.meaning.0": "9時2分",
+    "guide.sampleFigure.field.1": "部屋",
+    "guide.sampleFigure.meaning.1": "部屋A",
+    "guide.sampleFigure.field.2": "カードID",
+    "guide.sampleFigure.meaning.2": "使ったカードの識別番号",
+    "guide.sampleFigure.field.3": "入退室",
+    "guide.sampleFigure.meaning.3": "部屋の外から中へ入室",
+    "guide.sampleFigure.record": "4項目をカンマでつなぐと、この1行になります。",
+    "guide.sampleFigure.direction": "INは入室、OUTは退室です。この例はINなので、部屋へ入る場面を表します。"
   },
   "en": {
     "title": "Hash Chain Tamper Trainer",
@@ -944,7 +956,19 @@
     "guide.4.aim": "See that rebuilding the rest passes verification. Consider who can perform the calculation and where an independent copy is held.",
     "guide.5.aim": "See how a closing trailer changes the result when the end of a log is removed.",
     "guide.6.aim": "Compare outsiders and recorders according to who holds keys and independent copies.",
-    "guide.7.aim": "Use eight questions to check whether you can explain what the chain and its protections detect."
+    "guide.7.aim": "Use eight questions to check whether you can explain what the chain and its protections detect.",
+    "guide.sampleFigure.title": "From entering a room to one log record",
+    "guide.sampleFigure.alt": "A person using an access card to enter a room",
+    "guide.sampleFigure.field.0": "Time",
+    "guide.sampleFigure.meaning.0": "9:02 a.m.",
+    "guide.sampleFigure.field.1": "Room",
+    "guide.sampleFigure.meaning.1": "Room A",
+    "guide.sampleFigure.field.2": "Card ID",
+    "guide.sampleFigure.meaning.2": "Identifier of the card used",
+    "guide.sampleFigure.field.3": "Entry / exit",
+    "guide.sampleFigure.meaning.3": "Entering the room from outside",
+    "guide.sampleFigure.record": "Join the four fields with commas to make this record.",
+    "guide.sampleFigure.direction": "IN means entry; OUT means exit. This example uses IN, so the illustration shows someone entering the room."
   }
 };
 }));

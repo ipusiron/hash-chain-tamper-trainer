@@ -720,6 +720,42 @@
     return [observation('guide.waiting')];
   }
 
+  function sampleIllustration() {
+    const fields = samples[0].rows[0];
+    const figure = node('figure', undefined, 'sample-illustration');
+    const caption = node('figcaption', t('guide.sampleFigure.title'));
+    caption.id = 'sample-illustration-caption';
+    figure.setAttribute('aria-labelledby', caption.id);
+    const layout = node('div', undefined, 'sample-illustration-layout');
+    const scene = node('div', undefined, 'sample-scene');
+    const labels = node('div', undefined, 'sample-scene-labels');
+    labels.append(node('strong', fields[0]), node('strong', fields[1]));
+    const image = node('img');
+    image.src = 'assets/access-entry.webp';
+    image.alt = t('guide.sampleFigure.alt');
+    image.width = 1536;
+    image.height = 1024;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    scene.append(labels, image);
+    const meanings = node('dl', undefined, 'sample-fields');
+    for (let i = 0; i < fields.length; i += 1) {
+      const field = node('div', undefined, 'sample-field');
+      const term = node('dt');
+      term.append(node('span', String(i + 1), 'sample-field-number'),
+        node('span', t('guide.sampleFigure.field.' + i)));
+      const value = node('dd');
+      value.append(node('code', fields[i]), node('span', t('guide.sampleFigure.meaning.' + i)));
+      field.append(term, value);
+      meanings.append(field);
+    }
+    layout.append(scene, meanings);
+    const record = node('p', undefined, 'sample-record');
+    record.append(node('strong', t('guide.sampleFigure.record')), node('code', fields.join(',')));
+    figure.append(caption, layout, record, node('p', t('guide.sampleFigure.direction'), 'sample-direction'));
+    return figure;
+  }
+
   function renderGuideExplanation() {
     const step = guide.step;
     $('guide-aim').textContent = t('guide.' + step + '.aim');
@@ -733,7 +769,7 @@
       background.append(content);
     }
     if (step === 1) {
-      background.append(node('p',t('guide.sample')),node('p',t('guide.hashDisplay')));
+      background.append(node('p',t('guide.sample')),sampleIllustration(),node('p',t('guide.hashDisplay')));
     }
     if (step === 2) background.append(node('p',t('guide.avalanche')));
     if (step === 7) background.append(node('p',t('guide.7.prerequisite')));

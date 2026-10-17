@@ -46,6 +46,8 @@ Japanese, English, and light and dark themes are supported. Language changes pre
 
 ## 📖 Usage
 
+Step 1 pairs an illustration of card access with four labeled fields to explain one entry/exit record.
+
 The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Prerequisites are open from the start and include links to related tools.
 
 1. Build a chain: read what the fictional access log and starting hash mean, then calculate one row at a time. Follow the explanations of each input and hash, ending with the trailer that includes the row count.
@@ -189,7 +191,8 @@ hash-chain-tamper-trainer/        # Project root
 ├── README.en.md                  # English documentation
 ├── README.md                     # Japanese documentation
 ├── app.js                        # Interface and interactions
-├── assets/                       # Japanese screenshots
+├── assets/                       # Screenshots and illustration
+│   ├── access-entry.webp         # Card access illustration
 │   ├── chain.png                 # Chain view
 │   ├── en/                       # English screenshots
 │   │   ├── chain.png             # Chain view
