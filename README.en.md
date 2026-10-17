@@ -21,41 +21,45 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ## 📸 Screenshots
 
-![Fictional access log chain](assets/en/chain.png)
+![Learning path step 1](assets/en/chain.png)
 
-*Eight fictional records form a chain. Open a hash to see all 64 hexadecimal characters and its input.*
+*Step 1 follows the previous hash into the next row. Expand a row to inspect its complete input and hash.*
 
-![Protection and role comparison](assets/en/protections.png)
+![Learning path step 6](assets/en/protections.png)
 
-*Computed outcomes show the effects of protections, with the assumptions about checkpoints and time explained below.*
+*Step 6 compares computed protection outcomes for an outsider and the recorder.*
 
 ## ✨ Features
 
-| Tab | Content |
+| Entrance | Content |
 |---|---|
-| Build a chain | Fictional access log with 8 rows and temperature log with 6 rows; step through computation or add rows |
-| Try tampering | 7 modifications, first mismatch, expected and stored hashes, trailer verification |
-| Rechain and protect | Recompute the chain, compare 4 protections and 2 roles, choose combinations and inspect 4 steps |
-| Learn | 11 lessons, from hash properties to git and Merkle trees |
-| Quiz | 8 multiple-choice questions, explanations, links to related lessons and a return action |
+| Learning path | Seven guided steps: change one character, recompute one row, rechain, truncate, add protections and answer questions |
+| Free experiment | Two samples, row additions, seven modifications, all 16 protection combinations and computation details |
+| Learn | Eleven lessons with prerequisites and related tools; open the eight-question quiz at the end |
 
-The interface supports Japanese, English, and light and dark themes. Language changes preserve inputs, computed results and answers. Arrow keys, Home and End also navigate the tabs.
+Japanese, English, and light and dark themes are supported. Language changes preserve inputs, results and answers. Arrow keys, Home and End navigate entrances and steps. Progress is not saved.
 
 ## 📖 Usage
 
-1. Choose a sample in Build a chain and step through its computation.
-2. Rewrite row 2 in Try tampering, then inspect the first mismatch and hashes.
-3. Recompute all following hashes in Rechain and protect and observe verification pass.
-4. Choose protections, calculate the comparison and compare the outsider with the recorder.
-5. Use Learn and Quiz to examine the assumptions that change the outcome.
+The Learning path opens first. Perform each step, then read What you learned and the related lesson.
 
-Changing the sample, header setting or trailer setting rebuilds the original chain. Each modification starts from a copy of that original. Protection comparisons use the same row-2 rewrite of the selected sample.
+1. Build a chain: calculate the fictional hash chain one row at a time and follow each previous hash into the next input.
+2. Change one character: change row 2 from 09:05 to 09:06, see the mismatch at row 2 and inspect changed hash digits.
+3. Recompute just that row: recalculate row 2 of the same record and observe the first mismatch move to row 3.
+4. Rebuild all later hashes: rechain the modified record and compare the failing step-3 result with the passing step-4 result.
+5. Cut off the tail: remove the last two original rows and compare verification with and without a trailer.
+6. Add protections: select checkboxes and compare the outsider with the recorder.
+7. Check your understanding: answer eight questions and follow explanations to related lessons.
+
+Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
+
+Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path.
 
 ## 🔬 Chain format and verification results
 
 The seed is SHA-256 of the header lines joined with LF. Excluding the header uses 64 zeros instead. Each row hashes `previousHash + '|' + fields.join(',')`; the trailer hashes `lastHash + '|rows=' + count`.
 
-Hashes have 64 hexadecimal characters; the table shortens them to the first 12 and an ellipsis. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
+Hashes have 64 hexadecimal characters; compact rows show the first 8 characters of the preceding hash and the first 12 of the current hash. Expanding a row reveals the complete value. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
 
 The following results use the 8-row access log with its header and trailer. Operations target row 2; truncation removes the last 2 rows. A `-` means the remaining rows match but the original trailer does not. `pass` means verification succeeds after rechaining.
 
@@ -138,9 +142,14 @@ The lessons explain and link each reference.
 - [FIPS 180-4 — Secure Hash Standard](https://doi.org/10.6028/NIST.FIPS.180-4)
 - [RFC 4231 — HMAC-SHA test vectors](https://www.rfc-editor.org/rfc/rfc4231)
 
-- [Day041 Mic Gain Logger](https://ipusiron.github.io/mic-gain-logger/): a demonstrated rechaining case. [CSV documentation](https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md)
-- [Day002 Hash Identifier](https://ipusiron.github.io/hash-detector/): examines possible hash types from string formats
-- [Day053 JWT Inspector](https://ipusiron.github.io/jwt-inspector/): explores JWT structure and signatures
+- [Day002 Hash Identifier](https://ipusiron.github.io/hash-detector/): Hash string formats
+- [Day031 Git Secrets Playground](https://ipusiron.github.io/git-secrets-playground/): Computing Git objects
+- [Day041 Mic Gain Logger](https://ipusiron.github.io/mic-gain-logger/): Logs and a rechaining case study
+- [Day052 BaseXX Visualizer](https://ipusiron.github.io/basexx-visualizer/): Encoding byte sequences
+- [Day053 JWT Inspector](https://ipusiron.github.io/jwt-inspector/): HMAC and signature verification
+- [Day056 HashViz](https://ipusiron.github.io/hashviz/): Avalanche effect and collisions
+- [Day114 Hex Dump Trainer](https://ipusiron.github.io/hex-dump-trainer/): Hexadecimal and bytes
+- [Day029 OTP Animation](https://ipusiron.github.io/otp-animation/): One-time pad, distinct from the Lamport construction
 
 ## 🧪 Tests
 
@@ -175,7 +184,7 @@ hash-chain-tamper-trainer/   # Project root
 │   ├── protections.png      # Protection and role table
 │   └── tamper.png           # Tampering result
 ├── chain-core.js            # Chain and cryptography
-├── index.html               # Five-tab structure
+├── index.html               # Three entrances and seven guided steps
 ├── messages.js              # Japanese and English text
 ├── package.json             # Test command
 ├── samples.js               # Two fictional samples

@@ -118,7 +118,7 @@ test('Both readmes describe first mismatch and rechaining for seven modification
 });
 test('Related tools, known unverified coverage and developer commands are documented', () => {
   for(const doc of docs) {
-    for(const slug of ['mic-gain-logger','hash-detector','jwt-inspector']) assert.ok(doc.includes('https://ipusiron.github.io/'+slug+'/'));
+    for(const slug of ['hash-detector', 'git-secrets-playground', 'mic-gain-logger', 'basexx-visualizer', 'jwt-inspector', 'hashviz', 'hex-dump-trainer', 'otp-animation']) assert.ok(doc.includes('https://ipusiron.github.io/'+slug+'/'));
     assert.match(doc,/Safari/);
     assert.match(doc,/npm test/);
     assert.match(doc,/node --check/);
@@ -127,5 +127,14 @@ test('Related tools, known unverified coverage and developer commands are docume
   for(const name of ['chain-core.js','samples.js','messages.js','app.js','extractable: false','ECDSA','P-256']) assert.ok(guide.includes(name));
   for(const file of files().filter(f=>/\.(?:md|js|json|html|yml|css)$/.test(f))) {
     assert.doesNotMatch(read(file),/[CD]:[\\/]|\u6e1a|\u4ed5\u69d8\u66f8|\u8abf\u67fb\u5831\u544a|\u70b9\u691c\u8a18\u9332/,file);
+  }
+});
+
+test('Both usage sections follow the seven steps and three entrances', () => {
+  for (const [i,doc] of docs.entries()) {
+    const usage = doc.split(i === 0 ? '## 📖 使い方' : '## 📖 Usage')[1].split('\n## ')[0];
+    assert.deepEqual([...usage.matchAll(/^(\d)\. /gm)].map(m=>Number(m[1])),[1,2,3,4,5,6,7]);
+    for (const name of i===0 ? ['学習の流れ','自由に試す','座学'] : ['Learning path','Free experiment','Learn']) assert.ok(doc.includes(name));
+    assert.ok(usage.includes('09:05') && usage.includes('09:06'));
   }
 });
