@@ -1,0 +1,13 @@
+{
+  "name": "hash-chain-tamper-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learn hash chains by tampering and rechaining locally",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; connect-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Hash Chain Tamper Trainer</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="chain-core.js" defer></script>
+  <script src="samples.js" defer></script>
+  <script src="messages.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <div class="language-row"><button id="lang-toggle" type="button" data-i18n="language"></button></div>
+    <h1 data-i18n="title"></h1>
+    <p data-i18n="description"></p>
+  </header>
+  <noscript><p lang="ja">JavaScriptを有効にしてご利用ください。</p><p lang="en">Enable JavaScript to use this tool.</p></noscript>
+  <main>
+    <nav class="tabs" role="tablist" data-i18n-label="tabs">
+      <button id="tab-build" type="button" role="tab" aria-selected="true" aria-controls="panel-build" data-i18n="tab.build"></button>
+      <button id="tab-tamper" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-tamper" data-i18n="tab.tamper"></button>
+      <button id="tab-protect" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-protect" data-i18n="tab.protect"></button>
+      <button id="tab-learn" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-learn" data-i18n="tab.learn"></button>
+      <button id="tab-quiz" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-quiz" data-i18n="tab.quiz"></button>
+    </nav>
+    <div id="settings" class="settings">
+      <div><label for="sample-select" data-i18n="sample"></label><select id="sample-select"></select></div>
+      <div><label for="header-select" data-i18n="includeHeader"></label><select id="header-select"><option value="yes" data-i18n="yes"></option><option value="no" data-i18n="no"></option></select></div>
+      <div><label for="trailer-select" data-i18n="trailer"></label><select id="trailer-select"><option value="yes" data-i18n="yes"></option><option value="no" data-i18n="no"></option></select></div>
+    </div>
+    <p id="setup-note" class="muted" data-i18n="setupNote"></p>
+    <p id="announcement" role="status" aria-live="polite"></p>
+    <p id="error" role="alert" class="warning"></p>
+    <section id="panel-build" role="tabpanel" aria-labelledby="tab-build">
+      <h2 data-i18n="build.title"></h2><p data-i18n="build.intro"></p>
+      <div class="actions"><button id="step-start" data-i18n="stepStart"></button><button id="step-next" data-i18n="stepNext"></button><button id="step-all" data-i18n="stepAll"></button></div>
+      <p id="progress" aria-live="polite"></p>
+      <div id="build-chain"></div>
+      <h3 data-i18n="addTitle"></h3><p id="fields-note" class="muted" data-i18n="fieldsNote"></p>
+      <div id="add-fields" class="field-grid"></div><button id="add-row" data-i18n="add"></button>
+    </section>
+    <section id="panel-tamper" role="tabpanel" aria-labelledby="tab-tamper" hidden>
+      <h2 data-i18n="tamper.title"></h2><p data-i18n="tamper.intro"></p>
+      <div class="field-grid">
+        <div><label for="operation" data-i18n="operation"></label><select id="operation"></select></div>
+        <div><label for="target-row" data-i18n="targetRow"></label><select id="target-row"></select></div>
+        <div><label for="target-column" data-i18n="column"></label><select id="target-column"></select></div>
+        <div><label for="new-value" data-i18n="newValue"></label><input id="new-value" value="CHANGED" maxlength="64" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="tamper-fields-note"></div>
+        <div><label for="cut-count" data-i18n="cutCount"></label><input id="cut-count" type="number" value="2" min="1" max="8" autocomplete="off"></div>
+      </div>
+      <p id="tamper-fields-note" class="muted" data-i18n="fieldsNote"></p>
+      <div class="actions"><button id="apply-tamper" data-i18n="applyTamper"></button><button id="verify" data-i18n="verify"></button><button id="reset-tamper" data-i18n="resetTamper"></button></div>
+      <div id="tamper-result" aria-live="polite"></div><p class="muted" data-i18n="noInference"></p>
+      <div id="tampered-chain"></div>
+    </section>
+    <section id="panel-protect" role="tabpanel" aria-labelledby="tab-protect" hidden>
+      <h2 data-i18n="protect.title"></h2><p data-i18n="rechainIntro"></p>
+      <button id="rechain" data-i18n="rechain"></button><div id="rechain-result" aria-live="polite"></div>
+      <p class="privacy" data-i18n="coreLesson"></p>
+      <h3 data-i18n="matrixTitle"></h3><p data-i18n="matrixIntro"></p>
+      <div id="protection-options" class="field-grid"></div>
+      <button id="calculate-matrix" data-i18n="calculateMatrix"></button>
+      <div id="matrix"></div>
+      <details id="experiment-details"><summary data-i18n="details"></summary>
+        <label for="role-select" data-i18n="chooseRole"></label>
+        <select id="role-select"><option value="0" data-i18n="role.outsider"></option><option value="1" data-i18n="role.recorder"></option></select>
+        <div id="experiment-trace"></div>
+      </details>
+      <p data-i18n="checkpointNote"></p><p data-i18n="hmacNote"></p><p data-i18n="timeNote"></p><p class="privacy" data-i18n="simulationNote"></p>
+    </section>
+    <section id="panel-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
+      <h2 data-i18n="tab.learn"></h2>
+      <label for="lesson-select" data-i18n="lesson.choose"></label><select id="lesson-select"></select>
+      <div class="actions"><button id="lesson-previous" data-i18n="lesson.previous"></button><button id="lesson-next" data-i18n="lesson.next"></button><button id="back-to-quiz" data-i18n="quiz.back" hidden></button></div>
+      <article id="lesson-content"></article>
+      <button id="lesson-try" data-i18n="lesson.try"></button>
+    </section>
+    <section id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+      <h2 data-i18n="tab.quiz"></h2>
+      <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
+      <h3 id="quiz-prompt"></h3><div id="quiz-choices" class="quiz-choices"></div>
+      <div id="quiz-feedback" aria-live="polite"></div>
+      <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
+    </section>
+  </main>
+  <footer><p data-i18n="privacy"></p><p data-i18n="author"></p><a href="https://github.com/ipusiron/hash-chain-tamper-trainer" target="_blank" rel="noopener noreferrer" data-i18n="repository"></a></footer>
+</body>
+</html>
