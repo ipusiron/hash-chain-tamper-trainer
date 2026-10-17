@@ -138,3 +138,12 @@ test('Both usage sections follow the seven steps and three entrances', () => {
     assert.ok(usage.includes('09:05') && usage.includes('09:06'));
   }
 });
+
+test('Both readmes describe inline explanations, four advanced sections and reversible quiz destinations', () => {
+  const ja=read('README.md'), en=read('README.en.md'), developer=read('CLAUDE.md');
+  for (const word of ['いま起きたこと','仕組みの解説','4節','問題1〜6','問題7・8','18件']) assert.ok(ja.includes(word),word);
+  for (const word of ['What just happened','How it works','Four advanced','Questions 1–6','questions 7–8','all 18']) assert.ok(en.includes(word),word);
+  assert.ok(developer.includes('4節') && developer.includes('ステップ4・5・6・6・1・3'));
+  assert.doesNotMatch(ja+developer,/11節すべて|含む11節/);
+  assert.doesNotMatch(en,/Eleven lessons/);
+});

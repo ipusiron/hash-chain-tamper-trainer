@@ -23,7 +23,7 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Learning path step 1](assets/en/chain.png)
 
-*Step 1 follows the previous hash into the next row. Expand a row to inspect its complete input and hash.*
+*Step 1 explains the fictional record and uses the calculated hashes in What just happened to follow each row.*
 
 ![Learning path step 6](assets/en/protections.png)
 
@@ -33,23 +33,23 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 | Entrance | Content |
 |---|---|
-| Learning path | Seven guided steps: change one character, recompute one row, rechain, truncate, add protections and answer questions |
+| Learning path | Seven steps with an aim, open prerequisites, an action, What just happened, How it works and What you learned; from a one-character change to protections and questions |
 | Free experiment | Two samples, row additions, seven modifications, all 16 protection combinations and computation details |
-| Learn | Eleven lessons with prerequisites and related tools; open the eight-question quiz at the end |
+| Learn | Four advanced and reference sections: Lamport chains; Git, Merkle trees and blockchains; the Day041 case study; references |
 
 Japanese, English, and light and dark themes are supported. Language changes preserve inputs, results and answers. Arrow keys, Home and End navigate entrances and steps. Progress is not saved.
 
 ## 📖 Usage
 
-The Learning path opens first. Perform each step, then read What you learned and the related lesson.
+The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Prerequisites are open from the start and include links to related tools.
 
-1. Build a chain: calculate the fictional hash chain one row at a time and follow each previous hash into the next input.
+1. Build a chain: read what the fictional access log and starting hash mean, then calculate one row at a time. Follow the explanations of each input and hash, ending with the trailer that includes the row count.
 2. Change one character: change row 2 from 09:05 to 09:06, see the mismatch at row 2 and inspect changed hash digits.
 3. Recompute just that row: recalculate row 2 of the same record and observe the first mismatch move to row 3.
 4. Rebuild all later hashes: rechain the modified record and compare the failing step-3 result with the passing step-4 result.
 5. Cut off the tail: remove the last two original rows and compare verification with and without a trailer.
 6. Add protections: select checkboxes and compare the outsider with the recorder.
-7. Check your understanding: answer eight questions and follow explanations to related lessons.
+7. Check your understanding: answer eight questions. Questions 1–6 lead to explanations within the relevant step; questions 7–8 lead to Learn. Both destinations let you return to the same question.
 
 Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
 
@@ -59,7 +59,7 @@ Free experiment provides build, tamper and protection experiments. Changing samp
 
 The seed is SHA-256 of the header lines joined with LF. Excluding the header uses 64 zeros instead. Each row hashes `previousHash + '|' + fields.join(',')`; the trailer hashes `lastHash + '|rows=' + count`.
 
-Hashes have 64 hexadecimal characters; compact rows show the first 8 characters of the preceding hash and the first 12 of the current hash. Expanding a row reveals the complete value. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
+Hashes have 64 hexadecimal characters. Step 1 explanations and rows show the first 8 followed by an ellipsis. Other compact rows show the first 8 characters of the preceding hash and the first 12 of the current hash. Expanding a row reveals the complete value. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
 
 The following results use the 8-row access log with its header and trailer. Operations target row 2; truncation removes the last 2 rows. A `-` means the remaining rows match but the original trailer does not. `pass` means verification succeeds after rechaining.
 
@@ -121,7 +121,7 @@ CSP includes `connect-src 'none'`; the DOM is built with `textContent` and `crea
 
 ## 🔗 References and related tools
 
-The lessons explain and link each reference.
+Each step links the references for its explanation. The references section in Learn lists all 18, including works discussed in the steps.
 
 - [CyberGhost — Hash Chain](https://www.cyberghostvpn.com/en_US/glossary/hash-chain)
 - [Haber & Stornetta (1991), How to time-stamp a digital document](https://doi.org/10.1007/BF00196791)
@@ -161,7 +161,7 @@ node --check chain-core.js
 node --check app.js
 ```
 
-Tests cover cryptographic known answers, sample vectors independently generated with Python hashlib, 7 modifications, final-row exceptions, protection and role combinations, and all 16 protection selections. They also check HTML, CSP, both dictionaries, contrast, lessons, questions, and README tables and images. GitHub Actions checks every JavaScript file's syntax and runs `npm test` on push and pull_request.
+Tests cover cryptographic known answers, sample vectors independently generated with Python hashlib, 7 modifications, final-row exceptions, protection and role combinations, and all 16 protection selections. They also check HTML, CSP, both dictionaries, contrast, seven step explanations, four Learn sections, quiz destinations, and README tables and images. GitHub Actions checks every JavaScript file's syntax and runs `npm test` on push and pull_request.
 
 ## 📁 Directory structure
 
