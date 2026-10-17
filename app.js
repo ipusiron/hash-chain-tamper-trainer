@@ -686,9 +686,9 @@
     if (step === 2) explanation.prepend(node('p',t('guide.avalanche')));
     if (step === 7) {
       explanation.append(node('p',t('guide.7.explanation')));
-      const list = node('ul');
-      for (const key of ['guide.3.learned','guide.4.learned','guide.5.learned','guide.6.learned']) list.append(node('li',t(key)));
-      explanation.append(list);
+      for (const key of ['guide.3.learned','guide.4.learned','guide.5.learned','guide.6.learned']) {
+        explanation.append(node('p',t(key)));
+      }
     }
   }
 
