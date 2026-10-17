@@ -11,6 +11,7 @@
   <script src="chain-core.js" defer></script>
   <script src="samples.js" defer></script>
   <script src="messages.js" defer></script>
+  <script src="learning-progress.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -25,11 +26,14 @@
       <button id="tab-guide" type="button" role="tab" aria-selected="true" aria-controls="panel-guide" tabindex="0" data-i18n="tab.guide"></button>
       <button id="tab-free" type="button" role="tab" aria-selected="false" aria-controls="panel-free" tabindex="-1" data-i18n="tab.free"></button>
       <button id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="panel-learn" tabindex="-1" data-i18n="tab.learn"></button>
+      <button id="tab-settings" type="button" role="tab" aria-selected="false" aria-controls="panel-settings" tabindex="-1" data-i18n="tab.settings"></button>
     </nav>
     <p id="announcement" role="status" aria-live="polite"></p>
     <p id="error" role="alert" class="warning"></p>
+    <p id="learning-storage-warning" role="status" class="warning" hidden></p>
     <section id="panel-guide" role="tabpanel" aria-labelledby="tab-guide">
       <div class="guide-progress-row"><span id="guide-counter"></span><progress id="guide-progress" max="7" value="1"></progress></div>
+      <p id="guide-understood-count" class="understood-count" role="status"></p>
       <details id="guide-picker" class="step-picker"><summary data-i18n="guide.choose"></summary><ol id="guide-steps" class="guide-steps"></ol></details>
       <h2 id="guide-heading" tabindex="-1"></h2>
       <section class="guide-aim"><h3 data-i18n="guide.aim"></h3><p id="guide-aim"></p></section>
@@ -49,7 +53,31 @@
     </section></div>
       <section id="guide-mechanism" class="guide-mechanism" tabindex="-1" aria-labelledby="guide-mechanism-heading"><h3 id="guide-mechanism-heading" data-i18n="guide.mechanism"></h3><button id="guide-back-to-quiz" data-i18n="quiz.back" hidden></button><div id="guide-explanation"></div></section>
       <aside id="guide-takeaway" class="takeaway" hidden><h3 data-i18n="guide.learned"></h3><p id="guide-understood"></p></aside>
+      <div class="understanding-check">
+        <label class="check-option"><input id="guide-understood-check" type="checkbox" aria-describedby="understanding-note"><span data-i18n="learning.check"></span></label>
+        <p id="understanding-note" class="muted" data-i18n="learning.manual"></p>
+      </div>
       <div class="guide-navigation"><button id="guide-back" data-i18n="guide.back"></button><button id="guide-next" data-i18n="guide.next"></button></div>
+    </section>
+    <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+      <h2 id="learning-settings-heading" tabindex="-1" data-i18n="settings.title"></h2>
+      <p id="settings-understood-count" class="understood-count"></p>
+      <label class="check-option"><input id="learning-save" type="checkbox" aria-describedby="learning-save-note"><span data-i18n="learning.save"></span></label>
+      <p id="learning-save-note" data-i18n="learning.saveNote"></p>
+      <p id="learning-save-status" class="muted"></p>
+      <section aria-labelledby="learning-reset-heading">
+        <h3 id="learning-reset-heading" data-i18n="learning.resetHeading"></h3>
+        <p data-i18n="learning.resetNote"></p>
+        <button id="learning-reset" type="button" data-i18n="learning.reset"></button>
+        <div id="learning-reset-confirm" class="reset-confirm" role="group" aria-labelledby="learning-reset-question" hidden>
+          <p id="learning-reset-question"></p>
+          <div class="actions">
+            <button id="learning-reset-cancel" type="button" data-i18n="learning.cancel"></button>
+            <button id="learning-reset-apply" type="button" data-i18n="learning.confirm"></button>
+          </div>
+        </div>
+      </section>
+      <p id="learning-message" role="status"></p>
     </section>
     <section id="panel-free" role="tabpanel" aria-labelledby="tab-free" hidden>
       <h2 data-i18n="tab.free"></h2>

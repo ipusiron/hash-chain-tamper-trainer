@@ -7,10 +7,11 @@ const read = name => fs.readFileSync(path.join(__dirname, '..', name), 'utf8');
 const html = read('index.html');
 const app = read('app.js');
 
-test('Four local classic scripts are deferred in dependency order', () => {
+test('Five local classic scripts are deferred in dependency order', () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
-  assert.equal(scripts.length, 4);
-  assert.deepEqual(scripts.map(([,a]) => /src="([^"]+)"/.exec(a)[1]), ['chain-core.js','samples.js','messages.js','app.js']);
+  assert.equal(scripts.length, 5);
+  assert.deepEqual(scripts.map(([,a]) => /src="([^"]+)"/.exec(a)[1]),
+    ['chain-core.js','samples.js','messages.js','learning-progress.js','app.js']);
   for (const [,attrs, body] of scripts) {
     assert.match(attrs, /\bdefer\b/);
     assert.doesNotMatch(attrs, /type=/);
@@ -31,12 +32,16 @@ test('No unsafe DOM writes, inline handlers, networking, workers or record persi
   const storage = [...app.matchAll(/localStorage\.(getItem|setItem)\('([^']+)'/g)];
   assert.equal(storage.length, 2);
   assert.ok(storage.every(match => match[2] === 'hash-chain-tamper-trainer.lang'));
+  const learning = read('learning-progress.js');
+  assert.doesNotMatch(app + learning, /localStorage\.clear|\.removeItem\(|sessionStorage|indexedDB|document\.cookie/);
+  assert.match(learning, /const KEY = 'hash-chain-tamper-trainer\.learning'/);
+  assert.doesNotMatch(learning, /innerHTML|outerHTML|insertAdjacentHTML|\bfetch\s*\(|XMLHttpRequest|WebSocket/);
   assert.doesNotMatch(html, /type="file"|type="module"/);
 });
-test('Unique IDs, three entrances and three free-experiment tabs and explicit hidden override', () => {
+test('Unique IDs, four entrances and three free-experiment tabs and explicit hidden override', () => {
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(ids.length, new Set(ids).size);
-  for (const name of ['guide','free','learn','build','tamper','protect']) {
+  for (const name of ['guide','free','learn','settings','build','tamper','protect']) {
     assert.match(html, new RegExp(`id="tab-${name}"[^>]*role="tab"[^>]*aria-controls="panel-${name}"`));
     assert.match(html, new RegExp(`id="panel-${name}"[^>]*role="tabpanel"[^>]*aria-labelledby="tab-${name}"`));
   }

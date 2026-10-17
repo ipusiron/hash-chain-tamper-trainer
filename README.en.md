@@ -29,6 +29,10 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 *Step 6 compares computed protection outcomes for an outsider and the recorder.*
 
+![Understanding check settings](assets/en/settings.png)
+
+*View the understood count, change whether checks are saved, or clear all understanding checks.*
+
 ## ✨ Features
 
 | Entrance | Content |
@@ -36,8 +40,9 @@ Download the files and open `index.html` in a browser to use it over file://. No
 | Learning path | Seven steps with an aim, open prerequisites, an action, What just happened, How it works and What you learned; from a one-character change to protections and questions |
 | Free experiment | Two samples, row additions, seven modifications, all 16 protection combinations and computation details |
 | Learn | Four advanced and reference sections: Lamport chains; Git, Merkle trees and blockchains; the Day041 case study; references |
+| Settings | Save preferences and clear all understanding checks |
 
-Japanese, English, and light and dark themes are supported. Language changes preserve inputs, results and answers. Arrow keys, Home and End navigate entrances and steps. Progress is not saved.
+Japanese, English, and light and dark themes are supported. Language changes preserve inputs, results, answers and understanding checks. Arrow keys, Home and End navigate entrances and steps. The understood count is separate from the current step number.
 
 ## 📖 Usage
 
@@ -52,6 +57,10 @@ The Learning path opens first. Read the aim and prerequisites, then use the main
 7. Check your understanding: answer eight questions. Questions 1–6 lead to explanations within the relevant step; questions 7–8 lead to Learn. Both destinations let you return to the same question.
 
 Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
+
+At the end of each step, you can check or uncheck "I understand this step" yourself. Actions and quiz answers never check it automatically, and you can move on without checking it. The step list marks understood steps.
+
+In Settings, "Save understanding checks in this browser" is on by default. Turning it off removes saved checks while retaining the current checks until you reload. Turning it back on saves the current checks. "Clear all understanding checks" asks for confirmation and clears only the checks, preserving the language, saving preference, experiment data and quiz answers. Cancel or Esc dismisses the confirmation.
 
 Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path.
 
@@ -113,7 +122,9 @@ IPUSIRON writes technical books about security. The author does not encourage mi
 
 ## 🔒 Privacy and security
 
-Records, keys and checkpoints stay on the device and are neither saved nor sent. Reloading the page clears them. Only the language choice is stored, using the localStorage key `hash-chain-tamper-trainer.lang`. The app does not use sessionStorage, cookies or IndexedDB.
+Records, keys and checkpoints stay on the device and are neither saved nor sent. Reloading the page clears them. localStorage stores the language choice under `hash-chain-tamper-trainer.lang`, and the saving preference and checks when saving is on under `hash-chain-tamper-trainer.learning`. The current step number, calculation results and quiz answers are not saved. The app does not use sessionStorage, cookies or IndexedDB.
+
+If storage is unavailable, checks still work on the current page and a saving failure is shown. Invalid saved data is ignored and all checks start unchecked. If updating storage fails, reloading may restore previously saved checks.
 
 Web Crypto performs SHA-256, HMAC and ECDSA P-256 operations. Private and HMAC keys are generated as non-extractable and are never displayed. All computations, including the simulated time-stamp authority, stay on the device. No external authority or blockchain is contacted.
 
@@ -166,38 +177,42 @@ Tests cover cryptographic known answers, sample vectors independently generated 
 ## 📁 Directory structure
 
 ```text
-hash-chain-tamper-trainer/   # Project root
-├── .github/                 # GitHub configuration
-│   └── workflows/           # Automated checks
-│       └── test.yml         # Syntax and tests
-├── .gitignore               # Git exclusions
-├── CLAUDE.md                # Developer guide
-├── LICENSE                  # MIT license
-├── README.en.md             # English documentation
-├── README.md                # Japanese documentation
-├── app.js                   # Interface and interactions
-├── assets/                  # Japanese screenshots
-│   ├── chain.png            # Chain view
-│   ├── en/                  # English screenshots
-│   │   ├── chain.png        # Chain view
-│   │   └── protections.png  # Protection and role table
-│   ├── protections.png      # Protection and role table
-│   └── tamper.png           # Tampering result
-├── chain-core.js            # Chain and cryptography
-├── index.html               # Three entrances and seven guided steps
-├── messages.js              # Japanese and English text
-├── package.json             # Test command
-├── samples.js               # Two fictional samples
-├── style.css                # Layout and light/dark colors
-└── test/                    # Automated tests
-    ├── chain-vectors.json   # Independent chain vectors
-    ├── chain.test.js        # Chain and tampering checks
-    ├── contrast.test.js     # Contrast checks
-    ├── html.test.js         # HTML and CSP checks
-    ├── i18n.test.js         # Dictionary and wording checks
-    ├── learning.test.js     # Lesson and quiz checks
-    ├── protections.test.js  # Protection and role checks
-    └── readme.test.js       # Documentation consistency
+hash-chain-tamper-trainer/        # Project root
+├── .github/                      # GitHub configuration
+│   └── workflows/                # Automated checks
+│       └── test.yml              # Syntax and tests
+├── .gitignore                    # Git exclusions
+├── CLAUDE.md                     # Developer guide
+├── LICENSE                       # MIT license
+├── README.en.md                  # English documentation
+├── README.md                     # Japanese documentation
+├── app.js                        # Interface and interactions
+├── assets/                       # Japanese screenshots
+│   ├── chain.png                 # Chain view
+│   ├── en/                       # English screenshots
+│   │   ├── chain.png             # Chain view
+│   │   ├── protections.png       # Protection and role table
+│   │   └── settings.png          # Understanding check settings
+│   ├── protections.png           # Protection and role table
+│   ├── settings.png              # Understanding check settings
+│   └── tamper.png                # Tampering result
+├── chain-core.js                 # Chain and cryptography
+├── index.html                    # Four entrances and seven guided steps
+├── learning-progress.js          # Understanding checks and persistence
+├── messages.js                   # Japanese and English text
+├── package.json                  # Test command
+├── samples.js                    # Two fictional samples
+├── style.css                     # Layout and light/dark colors
+└── test/                         # Automated tests
+    ├── chain-vectors.json        # Independent chain vectors
+    ├── chain.test.js             # Chain and tampering checks
+    ├── contrast.test.js          # Contrast checks
+    ├── html.test.js              # HTML and CSP checks
+    ├── i18n.test.js              # Dictionary and wording checks
+    ├── learning-progress.test.js # Understanding and storage checks
+    ├── learning.test.js          # Lesson and quiz checks
+    ├── protections.test.js       # Protection and role checks
+    └── readme.test.js            # Documentation consistency
 ```
 
 ## 💻 Requirements
