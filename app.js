@@ -146,11 +146,11 @@
       const details = node('details', undefined, 'chain-row');
       const summary = node('summary');
       const fields = node('span', undefined, 'row-fields');
-      fields.append(node('strong', String(i + 1) + '. '), node('code', row.fields.join(',')));
+      fields.append(node('strong', t('visual.row', {n:i + 1}) + ': '), node('code', row.fields.join(',')));
       const previous = i === 0 ? chain.seed : chain.rows[i - 1].hash;
       const heads = node('span', undefined, 'row-heads');
       heads.append(node('span', t('inputHead')), node('code', previous.slice(0, 8) + (digits === 8 ? '\u2026' : ''), 'chain-link'),
-        node('span', ' → '), node('code', row.hash.slice(0, digits) + '\u2026', 'chain-link'));
+        node('span', ' → '), node('span', t('actual')), node('code', row.hash.slice(0, digits) + '\u2026', 'chain-link'));
       if (result) {
         const valid = result.rows[i].valid;
         details.classList.add(valid ? 'good' : 'bad');
