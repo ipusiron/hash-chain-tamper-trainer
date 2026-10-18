@@ -26,11 +26,11 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Learning path step 1](assets/en/chain.png)
 
-*The step-1 overview after all eight calculations. It separates the recorder who holds the record/hash pairs, the verifier who receives the bundle, and the independent checkpoint holder.*
+*Step 1 after calculating the hash for record 1. Inspect the actual input and output, and expand the input to read every UTF-8 byte.*
 
 ![Learning path step 6](assets/en/protections.png)
 
-*Step 6 compares computed protection outcomes for an outsider and the recorder.*
+*Select a step-6 verdict to inspect who holds the keys and evidence, the compared values, and the reason for the result.*
 
 ![Understanding check settings](assets/en/settings.png)
 
@@ -49,29 +49,29 @@ Japanese, English, and light and dark themes are supported. Language changes pre
 
 ## 📖 Usage
 
-Step 1 starts its prerequisites with the card-access illustration and a data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
+Step 1 starts with brief prerequisites and the card-access illustration, then leads to calculation. Expand the supporting material to inspect the format and data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
 
-The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Prerequisites are open from the start and include links to related tools.
+The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Brief prerequisites are visible from the start; expand the supporting explanation and related tools in place. Steps 1–6 offer optional predictions that you can compare with the result. Predictions and disclosure states are not saved.
 
 1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
 2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. Compare the original chain’s hashes with hashes recalculated from the changed records, record by record. Expand any record to compare all 64 characters.
-3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3.
-4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records, alongside the failing step-3 result.
-5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails.
-6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview.
-7. Check your understanding: answer eight questions. Questions 1–6 lead to explanations within the relevant step; questions 7–8 lead to Learn. Both destinations let you return to the same question.
+3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same.
+4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records and expand the step-3 comparison. A note beside the result distinguishes internal consistency from being unchanged since the original log.
+5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails. Compare the eight-record and six-record inputs and trailers, then also rebuild the trailer for six records.
+6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview. Select any verdict to inspect available keys and detection evidence.
+7. Check your understanding: answer eight questions. Questions 1–6 cover the core experiments and lead to explanations within the relevant step; questions 7–8 cover advanced topics and lead to Learn. Both destinations let you return to the same question.
 
 Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
 
 Each step distinguishes changing a record, updating its stored hash, and comparing values during verification. The trailer example keeps the original trailer for comparison, and the protection examples identify who holds the keys and the independent checkpoint.
 
-Each section heading has its own "I understand" checkbox. The aim, prerequisites, task, observation, individual explanation headings and takeaway form 44 independent sections across the seven steps. Checked sections have a green background and an Understood label. Actions and quiz answers never check them automatically, and you can move on without checking them. The step list shows partial counts for each step.
+Each section heading has its own "I understand" checkbox. The aim, prerequisites, task, observation, individual explanation headings and takeaway form 44 independent sections across the seven steps. Checked sections have a green background and an Understood label. Actions and quiz answers never check them automatically, and you can move on without checking them. The step list shows partial counts for each step. Each heading includes a criterion describing what you should be able to explain.
 
 Related tools have link buttons labeled "Open tool (new tab)" in the prerequisites and at the end of the corresponding explanation.
 
 In Settings, "Save understanding checks in this browser" is on by default. Turning it off removes saved checks while retaining the current checks until you reload. Turning it back on saves the current checks. "Clear all understanding checks" asks for confirmation and clears only the checks, preserving the language, saving preference, experiment data and quiz answers. Cancel or Esc dismisses the confirmation. Previous whole-step checks remain listed in Settings; individual section checks start unchecked. Clearing all checks also clears those previous records.
 
-Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path.
+Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path. Verification pairs each stored hash with its recalculated hash. Expand a record to inspect the actual verification input and the hash produced from that input.
 
 A side-by-side example connects the short display to all 64 characters, with the first 8 underlined. The calculation diagram separates the previous hash, separator and current record, and shows the actual input and output. Opening the exact input also shows every UTF-8 byte directly below it, with the byte count and character-to-byte examples.
 

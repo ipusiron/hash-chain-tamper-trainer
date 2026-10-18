@@ -8,6 +8,8 @@
   const learningModel = window.HashChainLearning;
   const learning = learningModel.create();
   let learningNotice = '';
+  const expanded = new Set();
+  const matrixSelection = { free: null, guide: null };
   const freeTabs = ['build', 'tamper', 'protect'];
   const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
   const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
@@ -36,6 +38,28 @@
     if (className) element.className = className;
     if (tag === 'p' && text && text.includes('\n')) element.classList.add('multiline');
     return element;
+  }
+
+
+  function disclosure(id, label, ...children) {
+    const details = node('details', undefined, 'learning-details');
+    details.id = id;
+    details.open = expanded.has(id);
+    details.append(node('summary', t(label)), ...children);
+    details.addEventListener('toggle', () => {
+      if (details.isConnected) {
+        if (details.open) expanded.add(id); else expanded.delete(id);
+      }
+    });
+    return details;
+  }
+
+  function resultMeaning(result) {
+    const box = node('aside', undefined, 'result-meaning');
+    box.append(node('strong', t('clarity.meaningTitle')),
+      node('p', t(result.valid ? 'clarity.meaningPass' : 'clarity.meaningFail')),
+      node('p', t('clarity.meaningLimit')));
+    return box;
   }
 
   function option(value, label) {
@@ -140,6 +164,7 @@
     const seedTitle = node('p', t(chain.includeHeader ? 'seed' : 'seedFixed'));
     header.append(seedTitle, hashDetails(chain.seed, chain.includeHeader ? chain.headers.join('\n') : undefined, digits));
     container.append(header);
+    if (result) container.append(node('p', t('clarity.verificationNote')));
     const list = node('ol', undefined, 'chain-list');
     chain.rows.forEach((row, i) => {
       const li = node('li');
@@ -147,7 +172,9 @@
       const summary = node('summary');
       const fields = node('span', undefined, 'row-fields');
       fields.append(node('strong', t('visual.row', {n:i + 1}) + ': '), node('code', row.fields.join(',')));
-      const previous = i === 0 ? chain.seed : chain.rows[i - 1].hash;
+      const verification = result && result.rows[i];
+      const input = verification ? verification.input : core.hashInput(i === 0 ? chain.seed : chain.rows[i - 1].hash, row.fields);
+      const previous = input.split('|')[0];
       const heads = node('span', undefined, 'row-heads');
       heads.append(node('span', t('inputHead')), node('code', previous.slice(0, 8) + (digits === 8 ? '\u2026' : ''), 'chain-link'),
         node('span', ' → '), node('span', t('actual')), node('code', row.hash.slice(0, digits) + '\u2026', 'chain-link'));
@@ -158,8 +185,9 @@
         summary.setAttribute('aria-label', t('row') + ' ' + (i + 1) + ' / ' + t(valid ? 'pass' : 'fail') + ' / ' + row.fields.join(','));
       }
       summary.append(fields, heads);
-      details.append(summary, node('p', t('input')), node('code', core.hashInput(previous, row.fields), 'hash-input'),
-        node('p', t('fullHash')), node('code', row.hash, 'hash'));
+      details.append(summary, node('p', t(verification ? 'clarity.verificationInput' : 'input')), node('code', input, 'hash-input'));
+      if (verification) details.append(node('p', t('expected')), node('code', verification.expected, 'hash verification-hash'));
+      details.append(node('p', t('fullHash')), node('code', row.hash, 'hash stored-hash'));
       li.append(details);
       list.append(li);
     });
@@ -167,7 +195,12 @@
     if (pending) container.append(node('p', t('trailerPending')));
     else if (chain.trailer) {
       container.append(node('p', t('trailer')),
-        hashDetails(chain.trailer.hash, core.trailerInput(core.tip(chain), chain.rows.length), digits));
+        hashDetails(chain.trailer.hash, result ? undefined : core.trailerInput(core.tip(chain), chain.rows.length), digits));
+      if (result && result.trailer.required) {
+        const previous = result.rows.length ? result.rows[result.rows.length - 1].expected : chain.seed;
+        container.append(node('p', t('clarity.verificationInput')), node('code', core.trailerInput(previous, chain.rows.length), 'hash-input'),
+          node('p', t('expected')), node('code', result.trailer.expected, 'hash'));
+      }
     } else container.append(node('p', t('trailerNone')));
   }
 
@@ -204,21 +237,40 @@
     }
     thead.append(heading);
     const tbody = node('tbody');
+    const context = trace ? 'free' : 'guide';
+    const evidence = node('section', undefined, 'matrix-evidence');
+    evidence.tabIndex = -1;
+    evidence.setAttribute('aria-live', 'polite');
+    const reveal = (i, role, focus = false) => {
+      matrixSelection[context] = [i, role];
+      const row = matrix[i];
+      const label = i === 5 ? t('protection.selected') : t('protection.' + (row.protections[0] || 'none'));
+      evidence.replaceChildren(protectionEvidence(row.results[role], label));
+      if (focus) evidence.focus();
+    };
     matrix.forEach((row, i) => {
       const tr = node('tr');
       const label = i === 5 ? t('protection.selected') : t('protection.' + (row.protections[0] || 'none'));
       const th = node('th', label);
       th.scope = 'row';
       tr.append(th);
-      row.results.forEach(result => {
-        const td = node('td', (result.detected ? '✓ ' : '— ') + t(result.detected ? 'detected' : 'undetected'), 'matrix-result');
+      row.results.forEach((result, role) => {
+        const td = node('td', undefined, 'matrix-result');
         td.dataset.detected = String(result.detected);
+        const button = node('button', (result.detected ? '✓ ' : '— ') + t(result.detected ? 'detected' : 'undetected'));
+        button.type = 'button';
+        button.dataset.matrixRow = String(i);
+        button.dataset.role = String(role);
+        button.setAttribute('aria-label', label + ' / ' + t('role.' + result.role) + ' / ' + t(result.detected ? 'detected' : 'undetected') + ' / ' + t('clarity.evidence'));
+        button.addEventListener('click', () => reveal(i, role, true));
+        td.append(button);
         tr.append(td);
       });
       tbody.append(tr);
     });
     table.append(thead, tbody);
-    destination.append(table);
+    destination.append(node('p', t('clarity.matrixNote')), table, evidence);
+    if (matrixSelection[context]) reveal(...matrixSelection[context]);
     if (!trace) return;
     const result = state.matrix[5].results[Number($('role-select').value)];
     const timeline = node('ol', undefined, 'timeline');
@@ -243,6 +295,30 @@
     $('experiment-trace').append(timeline);
   }
 
+
+  function protectionEvidence(result, label) {
+    const box = node('div');
+    box.append(node('h3', t('clarity.evidenceTitle', {protection:label, role:t('role.' + result.role), result:t(result.detected ? 'detected' : 'undetected')})),
+      node('p', t('clarity.holds.' + result.role)));
+    const pair = node('div', undefined, 'visual-grid');
+    pair.append(visualCard(t('oldTip'), visualHash(result.oldTip)), visualCard(t('newTip'), visualHash(result.newTip)));
+    box.append(pair);
+    for (const check of result.checks) {
+      const item = node('section', undefined, 'evidence-check');
+      item.dataset.check = check.kind;
+      item.dataset.valid = String(check.valid);
+      item.append(node('h4', t('check.' + check.kind) + ' / ' + t(check.valid ? 'pass' : 'fail')));
+      if (check.kind === 'timestamp') item.append(node('p', t(check.oldTokenValid ? 'clarity.reason.timestamp.original' : 'clarity.reason.timestamp', {
+        old:t(check.oldTokenValid ? 'pass' : 'fail'), fresh:t(check.newTokenValid ? 'pass' : 'fail'), deadline:check.closeTime, time:check.newTime
+      })));
+      else if (check.kind === 'signature') item.append(node('p', t('clarity.reason.signature.' + (check.renewed ? 'renewed' : check.valid ? 'retained' : 'old'))));
+      else item.append(node('p', t('clarity.reason.' + check.kind + '.' + (check.valid ? 'pass' : 'fail'))));
+      box.append(item);
+    }
+    box.append(node('p', t('clarity.evidenceLimit'), 'visual-conclusion'));
+    return box;
+  }
+
   function render() {
     localize();
     if (state.base) {
@@ -250,6 +326,8 @@
       renderChain($('build-chain'), state.shown, null, state.completed < state.base.rows.length);
       renderChain($('tampered-chain'), state.working, state.verified);
       renderResult($('tamper-result'), state.verified);
+      $('free-comparison').replaceChildren();
+      if (state.verified) $('free-comparison').append(resultMeaning(state.verified), visualChainComparison(state.verified, 'free'));
       renderResult($('rechain-result'), state.rechained);
       renderMatrix();
     }
@@ -391,6 +469,7 @@
     input.addEventListener('change', () => {
       state.selected = core.PROTECTIONS.filter(key => $('protect-' + key).checked);
       state.matrix = null;
+      matrixSelection.free = null;
       renderMatrix();
     });
   });
@@ -402,6 +481,7 @@
   function relatedTools(lesson) {
     const tools = node('div', undefined, 'related-tools');
     tools.setAttribute('aria-label', t('lesson.relatedTools'));
+    if (lesson === 7) tools.append(node('p', t('lesson.8.distinction'), 'tool-context'));
     for (const day of lessonTools[lesson]) {
       const link = node('a', undefined, 'tool-link');
       link.href = t('tool.' + day + '.url');
@@ -483,8 +563,9 @@
     const prefix = 'lesson.' + (state.lesson + 1);
     content.replaceChildren(node('h3', t(prefix + '.title').replace(/^\d+\. /,'')),$('back-to-quiz'),lessonPrerequisite(state.lesson));
     lessonBody(state.lesson, content);
-    replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1})]));
+    replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1}) + ' / ' + t(i < 6 ? 'clarity.quiz.core' : 'clarity.quiz.advanced')]));
     $('question-select').value = String(state.question);
+    $('quiz-level').textContent = t(state.question < 6 ? 'clarity.quiz.core' : 'clarity.quiz.advanced');
     const questionPrefix = 'quiz.' + (state.question + 1);
     $('quiz-prompt').textContent = t(questionPrefix + '.prompt');
     $('quiz-choices').replaceChildren();
@@ -561,7 +642,7 @@
   $('lesson-try').addEventListener('click', () => showTab('protect', true));
 
   const guide = { step: 1, base: null, partial: null, firstHash: null, shown: 0, modified: null, single: null, rebuilt: null,
-    results: {}, selected: [], matrix: null, quizOpen: false, prepared: false };
+    results: {}, selected: [], matrix: null, quizOpen: false, prepared: false, cut: null, trailerRebuilt: null, predictions: {} };
   const guideSources = [[0, 1], [2], [2], [4, 5], [3], [6], []];
   const guidePrerequisites = [[0, 1], [0, 2], [2], [4, 5], [3], [6], []];
 
@@ -611,6 +692,8 @@
     }
     if (step === 5) {
       const cut = await core.tamper(base, 'truncate', {count:2});
+      guide.cut = cut;
+      guide.trailerRebuilt = null;
       guide.results[5] = [await core.verify({...cut, hasTrailer:false, trailer:null}), await core.verify(cut)];
     }
     if (step === 6) guide.matrix = await core.comparison(samples[0], guide.selected);
@@ -717,8 +800,8 @@
         without:t(without.valid ? 'pass' : 'fail'), with:t(withTrailer.valid ? 'pass' : 'fail'),
         expected:shortHash(withTrailer.expected), actual:shortHash(withTrailer.actual)})];
     }
-    if (step === 6 && guide.matrix) return guide.matrix.map((row, i) => observation('guide.now.6', {
-      protection:i === 5 ? t('protection.selected') : t('protection.' + (row.protections[0] || 'none')),
+    if (step === 6 && guide.matrix) return guide.matrix.slice(-1).map((row, i) => observation('guide.now.6', {
+      protection:t('protection.selected'),
       outsider:t(row.results[0].detected ? 'detected' : 'undetected'),
       recorder:t(row.results[1].detected ? 'detected' : 'undetected')}));
     if (step === 7 && guide.quizOpen) {
@@ -787,6 +870,8 @@
   $('guide-overview-jump').addEventListener('click', () => {
     const figure = $('guide-chain-overview');
     if (!figure) return;
+    let parent = figure.parentElement;
+    while (parent) { if (parent.tagName === 'DETAILS') { parent.open = true; expanded.add(parent.id); } parent = parent.parentElement; }
     figure.focus({preventScroll:true});
     figure.scrollIntoView({block:'start'});
   });
@@ -823,7 +908,7 @@
     layout.append(scene, meanings);
     const record = node('p', undefined, 'sample-record');
     record.append(node('strong', t('guide.sampleFigure.record')), node('code', fields.join(',')));
-    figure.append(caption, layout, record, node('p', t('guide.sampleFigure.direction'), 'sample-direction'));
+    figure.append(caption, layout, record);
     return figure;
   }
 
@@ -885,10 +970,10 @@
   function visualChainComparison(result, stage) {
     const block = node('div', undefined, 'visual-row-group chain-comparison');
     block.dataset.stage = String(stage);
-    block.append(node('strong', t('compare.title.' + stage), 'visual-label'),
-      node('p', t('compare.note.' + stage)));
+    block.append(node('strong', t(stage === 'free' ? 'clarity.freeTitle' : 'compare.title.' + stage), 'visual-label'),
+      node('p', t(stage === 'free' ? 'clarity.freeNote' : 'compare.note.' + stage)));
     const headings = node('div', undefined, 'comparison-headings');
-    headings.append(node('strong', t('compare.left.' + stage)),
+    headings.append(node('strong', t(stage === 'free' ? 'clarity.freeLeft' : 'compare.left.' + stage)),
       node('span', t('compare.judge')), node('strong', t('compare.right')));
     const list = node('ol', undefined, 'visual-rows comparison-rows');
     for (const row of result.rows) {
@@ -912,7 +997,7 @@
       const pair = node('div', undefined, 'visual-grid');
       pair.append(visualCard(t('compare.stored'), visualHash(row.actual)),
         visualCard(t('compare.recalculated'), visualHash(row.expected)));
-      full.append(pair);
+      full.append(node('p', t('clarity.verificationInput')), node('code', row.input, 'hash-input'), pair);
       li.append(stored, status, recalculated, full);
       list.append(li);
     }
@@ -939,6 +1024,49 @@
     } else block.append(node('p', t('visual.bytes.header')));
     block.append(node('p', t('visual.bytes.use', {count:bytes.length}), 'visual-byte-note'));
     return block;
+  }
+
+
+  function propagationFigure() {
+    const figure = visualFigure('clarity.propagation');
+    figure.classList.add('propagation');
+    const grid = node('div', undefined, 'visual-grid');
+    for (const [name, previous, hash] of [
+      ['original', guide.base.rows[1].hash, guide.base.rows[2].hash],
+      ['recomputed', guide.results[2].rows[1].expected, guide.results[2].rows[2].expected]
+    ]) {
+      const card = node('div', undefined, 'visual-card');
+      card.dataset.path = name;
+      const prefix = node('code', shortHash(previous), 'propagation-prefix'); prefix.title = previous;
+      const output = node('code', shortHash(hash), 'propagation-output'); output.title = hash;
+      card.append(node('h4', t('clarity.' + name)), node('p', t('clarity.prefix')), prefix,
+        node('p', t('clarity.sameRecord')), node('code', guide.base.rows[2].fields.join(','), 'propagation-fields'),
+        node('p', t('clarity.output3')), output);
+      const input = core.hashInput(previous, guide.base.rows[2].fields);
+      const full = node('details');
+      full.append(node('summary', t('visual.exact')), node('code', input, 'hash-input'));
+      card.append(full); grid.append(card);
+    }
+    figure.append(grid, node('p', t('clarity.propagationNote'), 'visual-conclusion'));
+    return figure;
+  }
+
+  function trailerComparison() {
+    const pair = node('div', undefined, 'visual-grid trailer-comparison');
+    const result = guide.results[5][1];
+    for (const [key, input, hash] of [
+      ['clarity.trailerOriginal', core.trailerInput(core.tip(guide.base), guide.base.rows.length), result.trailer.actual],
+      ['clarity.trailerCut', core.trailerInput(result.rows[result.rows.length - 1].expected, result.rows.length), result.trailer.expected]
+    ]) {
+      const card = node('div', undefined, 'visual-card');
+      const value = node('code', undefined, 'hash-input');
+      const split = input.lastIndexOf('|');
+      value.append(input.slice(0, split), node('wbr'), node('strong', input.slice(split), 'observation-token'));
+      card.append(node('h4', t(key)), node('p', t('clarity.trailerInput')), value,
+        node('p', t('clarity.trailerHash')), visualHash(hash));
+      pair.append(card);
+    }
+    return pair;
   }
 
   function guideVisual() {
@@ -984,21 +1112,15 @@
       const pair = node('div', undefined, 'visual-grid');
       pair.append(visualCard(t('visual.recordBefore'), core.hashInput(guide.firstHash, before)),
         visualCard(t('visual.recordAfter'), core.hashInput(guide.firstHash, after), t('visual.changeTime')));
-      figure.append(pair);
+      figure.append(disclosure('guide-input-pair-' + step, 'clarity.inputs', pair));
       const result = guide.results[step];
       if (!result) {
         figure.append(node('p', t('visual.plan.' + step), 'visual-conclusion'));
         return figure;
       }
-      if (step === 4) figure.append(visualChainComparison(guide.results[3], 3));
+      figure.append(propagationFigure());
+      if (step === 4) figure.append(disclosure('guide-previous-comparison', 'clarity.previousStage', visualChainComparison(guide.results[3], 3)));
       figure.append(visualChainComparison(result, step));
-      if (step < 4) {
-        const mismatch = result.rows[result.firstMismatch - 1];
-        const hashes = node('div', undefined, 'visual-grid');
-        hashes.append(visualCard(t('visual.storedAt', {n:result.firstMismatch}), visualHash(mismatch.actual)),
-          visualCard(t('visual.expectedAt', {n:result.firstMismatch}), visualHash(mismatch.expected)));
-        figure.append(hashes);
-      }
       figure.append(node('p', t('visual.result.' + step), 'visual-conclusion'));
       return figure;
     }
@@ -1012,7 +1134,22 @@
         const results = node('div', undefined, 'visual-grid');
         results.append(visualCard(t('guide.withoutTrailer'), t(without.valid ? 'pass' : 'fail'), t('visual.cutWithout')),
           visualCard(t('guide.withTrailer'), t(withTrailer.valid ? 'pass' : 'fail'), t('visual.cutWith')));
-        figure.append(results);
+        figure.append(results, trailerComparison());
+        const rebuild = node('button', t('clarity.rebuildTrailer'));
+        rebuild.type = 'button'; rebuild.id = 'guide-trailer-rebuild';
+        rebuild.addEventListener('click', async () => {
+          await perform(async () => { guide.trailerRebuilt = await core.verify(await core.rechain(guide.cut)); });
+          const result = $('guide-trailer-rebuilt');
+          if (result) result.focus();
+        });
+        figure.append(rebuild);
+        if (guide.trailerRebuilt) {
+          const updated = node('section'); updated.id = 'guide-trailer-rebuilt'; updated.tabIndex = -1;
+          updated.append(node('h4', t('clarity.rebuiltTrailer')));
+          const verification = node('div'); renderResult(verification, guide.trailerRebuilt, true);
+          updated.append(verification, node('p', t('clarity.rebuiltNote')), resultMeaning(guide.trailerRebuilt));
+          figure.append(updated);
+        }
       }
       figure.append(node('p', t('visual.cutLimit'), 'visual-conclusion'));
       return figure;
@@ -1065,23 +1202,28 @@
     $('guide-aim').textContent = t('guide.' + step + '.aim');
     const background = $('guide-background');
     background.replaceChildren();
-    if (step === 1) {
-      background.append(node('p', t('overview.sample')), sampleIllustration(), chainOverview());
-    }
+    background.append(node('p', t('clarity.prerequisite.' + step)));
+    if (step === 1) background.append(sampleIllustration());
+    const more = disclosure('guide-background-more-' + step, 'clarity.more');
+    if (step === 1) more.append(disclosure('guide-overview-details', 'clarity.overview', chainOverview()),
+      node('p', t('clarity.aimDetail.1')), node('p', t('guide.sampleFigure.direction')));
     for (const lesson of guidePrerequisites[step - 1]) {
       const content = lessonPrerequisite(lesson);
       content.querySelector('h4').remove();
       content.className = 'guide-background-part';
       content.dataset.sourceLesson = String(lesson + 1);
-      background.append(content);
+      more.append(content);
     }
     if (step === 1) {
-      background.append(node('p',t('guide.sample')),node('p',t('guide.hashDisplay')),hashDisplayExample());
+      more.append(node('p',t('guide.sample')),node('p',t('guide.hashDisplay')),hashDisplayExample());
     }
-    if (step === 2) background.append(node('p',t('guide.avalanche')));
-    if (step === 7) background.append(node('p',t('guide.7.prerequisite')));
+    if (step === 2) more.append(node('p',t('guide.avalanche')));
+    if (step === 7) more.append(node('p',t('guide.7.prerequisite')));
+    background.append(more);
     $('guide-now').replaceChildren(...guideObservation().flatMap(({key, values}) =>
       messages[language][key].split('\n').map(template => observationParagraph(template, values))));
+    $('guide-meaning').replaceChildren();
+    if (step >= 2 && step <= 4 && guide.results[step]) $('guide-meaning').append(resultMeaning(guide.results[step]));
     $('guide-visual').replaceChildren(guideVisual());
     const explanation = $('guide-explanation');
     explanation.replaceChildren();
@@ -1136,6 +1278,39 @@
     $('guide-action').textContent = t(guide.shown === total ? 'guide.build.complete' : 'guide.build.calculate', {n:guide.shown + 1, total});
   }
 
+
+  function renderExperimentContext() {
+    const step = guide.step;
+    const done = step === 1 ? guide.shown > 0 : step === 6 ? !!guide.matrix : !!guide.results[step];
+    const stateBox = $('guide-state');
+    stateBox.replaceChildren();
+    stateBox.hidden = step < 2 || step > 4;
+    if (!stateBox.hidden) stateBox.append(node('strong', t('clarity.state')),
+      node('p', t(done ? 'clarity.state.' + step : 'clarity.state.wait')),
+      node('p', t('clarity.state.checkpoint')));
+    const holder = $('guide-prediction');
+    holder.replaceChildren(); holder.hidden = step === 7;
+    if (step === 7) return;
+    const form = node('fieldset');
+    form.append(node('legend', t('clarity.predict.' + step)));
+    const feedback = node('p'); feedback.setAttribute('role', 'status');
+    const answer = step === 1 ? true : step === 2 ? !guide.results[2]?.rows[2].valid : step === 3 ? guide.results[3]?.valid :
+      step === 4 ? guide.results[4]?.valid : step === 5 ? !guide.results[5]?.[1].valid : guide.matrix?.[2].results[1].detected;
+    const explain = () => {
+      feedback.textContent = done && Object.hasOwn(guide.predictions, step)
+        ? t(guide.predictions[step] === answer ? 'clarity.predict.match' : 'clarity.predict.different') : '';
+    };
+    for (const value of [true, false]) {
+      const label = node('label', undefined, 'check-option prediction-choice');
+      const input = node('input'); input.type = 'radio'; input.name = 'prediction-' + step;
+      input.value = String(value); input.checked = guide.predictions[step] === value;
+      input.addEventListener('change', () => { guide.predictions[step] = value; explain(); });
+      label.append(input, node('span', t(value ? 'clarity.predict.yes' : 'clarity.predict.no'))); form.append(label);
+    }
+    explain();
+    holder.append(disclosure('guide-prediction-' + step, 'clarity.predict', form, feedback));
+  }
+
   function renderGuide() {
     const step = guide.step;
     $('guide-heading').textContent = t('guide.' + step + '.title');
@@ -1143,6 +1318,7 @@
     $('guide-task').textContent = t('guide.' + step + '.task');
     $('guide-action').textContent = t('guide.' + step + '.action');
     renderBuildProgress();
+    renderExperimentContext();
     $('guide-counter').textContent = t('guide.counter', {n:step});
     $('guide-progress').value = step;
     $('guide-progress').setAttribute('aria-label', t('guide.counter', {n:step}));
@@ -1168,10 +1344,10 @@
         if (i > 0) li.append(node('span', t('guide.fromPrevious')), node('code', (i === 1 ? guide.partial.seed : guide.partial.rows[0].hash).slice(0,8) + '\u2026', 'chain-link'));
         flow.append(li);
       });
-      output.append(flow);
+      const detail = disclosure('guide-calculated-records-1', 'clarity.rows', flow);
       const rows = node('div');
       renderChain(rows, {...guide.partial, rows:guide.partial.rows.slice(0,guide.shown), trailer:guide.shown === 8 ? guide.partial.trailer : null}, null, guide.shown < 8, 8);
-      output.append(rows);
+      detail.append(rows); output.append(detail);
     }
     if ((step === 2 || step === 3) && guide.results[step]) {
       guideResult(output, guide.results[step]);
@@ -1191,7 +1367,7 @@
       }
       const rows = node('div');
       renderChain(rows, step === 2 ? guide.modified : guide.single, guide.results[step]);
-      output.append(rows);
+      output.append(disclosure('guide-calculated-records-' + step, 'clarity.rows', rows));
     }
     if (step === 4 && guide.results[4]) {
       const comparison = node('div', undefined, 'comparison');
@@ -1238,6 +1414,13 @@
     const input = header.querySelector('input');
     input.id = 'understood-' + key;
     input.setAttribute('aria-label', t('learning.checkNamed', {title:header.querySelector('h3, h4').textContent}));
+    let criterion = section.querySelector(':scope > .learning-criterion');
+    if (!criterion) { criterion = node('p', undefined, 'learning-criterion'); section.append(criterion); }
+    const part = key.split('-')[1];
+    const criterionKey = ['observation', 'takeaway'].includes(part) ? String(guide.step) : part;
+    criterion.textContent = t('clarity.criterion', {text:t('clarity.criterion.' + criterionKey)});
+    criterion.id = 'criterion-' + key;
+    input.setAttribute('aria-describedby', criterion.id);
   }
 
   function renderUnderstanding() {
@@ -1336,6 +1519,7 @@
     input.addEventListener('change', () => {
       guide.selected = core.PROTECTIONS.filter(key => $('guide-protect-' + key).checked);
       guide.matrix = null;
+      matrixSelection.guide = null;
       renderGuide();
     });
   }
