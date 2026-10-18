@@ -729,6 +729,68 @@
     return [observation('guide.waiting')];
   }
 
+  function chainOverview() {
+    const figure = node('figure', undefined, 'chain-overview');
+    figure.id = 'guide-chain-overview';
+    figure.tabIndex = -1;
+    const caption = node('figcaption', t('overview.title'));
+    caption.id = 'guide-chain-overview-caption';
+    figure.setAttribute('aria-labelledby', caption.id);
+    figure.append(caption, node('p', t('overview.intro')));
+    const layout = node('div', undefined, 'overview-layout');
+    const bundle = node('div', undefined, 'overview-bundle');
+    bundle.append(node('strong', t('overview.recorder')), node('p', t('overview.bundle')));
+    const header = node('div', undefined, 'overview-part');
+    header.append(node('strong', t('overview.header')), node('pre', samples[0].headers.join('\n')));
+    const list = node('ol', undefined, 'overview-records');
+    samples[0].rows.forEach((fields, i) => {
+      const pair = node('li', undefined, 'overview-pair');
+      pair.dataset.record = String(i + 1);
+      const record = node('div');
+      record.append(node('strong', t('visual.row', {n:i + 1})), node('code', fields.join(',')));
+      const output = node('div');
+      output.append(node('span', t('guide.flowRow', {n:i + 1})));
+      const hash = guide.partial && i < guide.shown ? guide.partial.rows[i].hash : null;
+      pair.dataset.computed = String(!!hash);
+      if (hash) {
+        const value = node('code', shortHash(hash), 'overview-hash');
+        value.title = hash;
+        output.append(value);
+      } else output.append(node('span', t('overview.pending'), 'muted'));
+      pair.append(record, output);
+      list.append(pair);
+    });
+    const trailer = node('div', undefined, 'overview-part overview-trailer');
+    trailer.append(node('strong', t('overview.trailer')));
+    const complete = guide.shown === samples[0].rows.length && guide.partial && guide.partial.trailer;
+    if (complete) {
+      trailer.append(node('code', 'rows=' + guide.partial.rows.length), node('code', guide.partial.trailer.hash, 'hash'));
+    } else trailer.append(node('p', t('overview.trailerPending')));
+    bundle.append(header, list, trailer, node('p', t('overview.hashNote'), 'muted'));
+    const people = node('div', undefined, 'overview-people');
+    const verifier = node('div', undefined, 'overview-person');
+    verifier.append(node('strong', t('overview.verifier')));
+    const checks = node('ol');
+    for (const key of ['receive', 'recompute', 'compare']) checks.append(node('li', t('overview.' + key)));
+    verifier.append(checks);
+    const keeper = node('div', undefined, 'overview-person overview-independent');
+    keeper.append(node('strong', t('overview.keeper')), node('p', t('overview.checkpoint')));
+    if (complete) keeper.append(node('code', core.tip(guide.partial), 'hash overview-tip'));
+    else keeper.append(node('p', t('overview.tipPending'), 'muted'));
+    keeper.append(node('p', t('overview.independent')));
+    people.append(verifier, keeper);
+    layout.append(bundle, people);
+    figure.append(layout, node('p', t('overview.input'), 'privacy'), node('p', t('overview.scope'), 'muted'));
+    return figure;
+  }
+
+  $('guide-overview-jump').addEventListener('click', () => {
+    const figure = $('guide-chain-overview');
+    if (!figure) return;
+    figure.focus({preventScroll:true});
+    figure.scrollIntoView({block:'start'});
+  });
+
   function sampleIllustration() {
     const fields = samples[0].rows[0];
     const figure = node('figure', undefined, 'sample-illustration');
@@ -965,6 +1027,9 @@
     $('guide-aim').textContent = t('guide.' + step + '.aim');
     const background = $('guide-background');
     background.replaceChildren();
+    if (step === 1) {
+      background.append(node('p', t('overview.sample')), sampleIllustration(), chainOverview());
+    }
     for (const lesson of guidePrerequisites[step - 1]) {
       const content = lessonPrerequisite(lesson);
       content.querySelector('h4').remove();
@@ -973,7 +1038,7 @@
       background.append(content);
     }
     if (step === 1) {
-      background.append(node('p',t('guide.sample')),sampleIllustration(),node('p',t('guide.hashDisplay')),hashDisplayExample());
+      background.append(node('p',t('guide.sample')),node('p',t('guide.hashDisplay')),hashDisplayExample());
     }
     if (step === 2) background.append(node('p',t('guide.avalanche')));
     if (step === 7) background.append(node('p',t('guide.7.prerequisite')));
@@ -1046,6 +1111,7 @@
     renderUnderstanding();
     $('guide-back-to-quiz').hidden = state.returnQuestion === null || step === 7;
     $('guide-reset').hidden = step < 2 || step > 4;
+    $('guide-overview-jump').hidden = step !== 1 || guide.shown !== samples[0].rows.length;
     $('guide-options').hidden = step !== 6;
     $('guide-quiz').hidden = step !== 7 || !guide.quizOpen;
     $('panel-quiz').hidden = !guide.quizOpen;

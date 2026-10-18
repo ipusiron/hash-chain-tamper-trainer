@@ -10,7 +10,10 @@ English · [日本語](README.md)
 
 **Day117 - 200 Security Tools with Generative AI**
 
-Hash Chain Tamper Trainer explores what a hash chain can and cannot detect.
+Hash Chain Tamper Trainer explores what a hash chain can and cannot detect. A hash is the output of a hash function.
+
+This tool keeps records with their corresponding hashes and compares them with recomputed hashes. The overview in step 1 shows the data structure and the roles of the recorder, verifier and independent checkpoint holder.
+
 Change fictional records and recompute the following hashes to see verification pass again. The tool also computes the outcomes of adding a held checkpoint, HMAC, a signature or a time-stamp for people with different access to keys.
 
 ## 🌐 Demo
@@ -23,7 +26,7 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Learning path step 1](assets/en/chain.png)
 
-*Step 1 explains the fictional record and uses the calculated hashes in What just happened to follow each row.*
+*The step-1 overview after all eight calculations. It separates the recorder who holds the record/hash pairs, the verifier who receives the bundle, and the independent checkpoint holder.*
 
 ![Learning path step 6](assets/en/protections.png)
 
@@ -46,16 +49,16 @@ Japanese, English, and light and dark themes are supported. Language changes pre
 
 ## 📖 Usage
 
-Step 1 pairs an illustration of card access with four labeled fields to explain one entry/exit record.
+Step 1 starts its prerequisites with the card-access illustration and a data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
 
 The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Prerequisites are open from the start and include links to related tools.
 
-1. Build a chain: read what the fictional access log and starting hash mean, then calculate one row at a time. An eight-row diagram shows calculated, next, and pending rows. Restart from row 1 during or after the calculation. Follow the explanations of each input and hash, ending with the trailer that includes the row count.
-2. Change one character: change row 2 from 09:05 to 09:06, see the mismatch at row 2 and inspect changed hash digits.
-3. Recompute just that row: recalculate row 2 of the same record and observe the first mismatch move to row 3.
-4. Rebuild all later hashes: rechain the modified record and compare the failing step-3 result with the passing step-4 result.
-5. Cut off the tail: remove the last two original rows and compare verification with and without a trailer.
-6. Add protections: select checkboxes and compare the outsider with the recorder.
+1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
+2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. The first mismatch is the hash comparison for record 2.
+3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3.
+4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records, alongside the failing step-3 result.
+5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails.
+6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview.
 7. Check your understanding: answer eight questions. Questions 1–6 lead to explanations within the relevant step; questions 7–8 lead to Learn. Both destinations let you return to the same question.
 
 Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
@@ -76,11 +79,35 @@ Diagrams show the status of all 8 rows, tail deletion, and the people who hold k
 
 ## 🔬 Chain format and verification results
 
-The seed is SHA-256 of the header lines joined with LF. Excluding the header uses 64 zeros instead. Each row hashes `previousHash + '|' + fields.join(',')`; the trailer hashes `lastHash + '|rows=' + count`.
+This tool keeps records paired with their corresponding hashes, as shown below. This is a content structure, not a universal CSV or JSON specification. File formats, storage locations and access policies are deployment choices; neither records nor hashes need to be made public.
 
-Hashes have 64 hexadecimal characters. Step 1 explanations and rows show the first 8 followed by an ellipsis. Other compact rows show the first 8 characters of the preceding hash and the first 12 of the current hash. Expanding a row reveals the complete value. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
+```plaintext
+Bundle held by the recorder
+  Header                    Record type, start time, etc.
+  Record 1 + its hash
+  Record 2 + its hash
+  ...
+  Record 8 + its hash
+  Trailer                   Check of the count and ending
+```
 
-The following results use the 8-row access log with its header and trailer. Operations target row 2; truncation removes the last 2 rows. A `-` means the remaining rows match but the original trailer does not. `pass` means verification succeeds after rechaining.
+| Role | What is kept, received or compared |
+|---|---|
+| Recorder | Keeps the bundle above and gives it to the verifier |
+| Verifier | Receives the bundle, recomputes from the header onward, and compares with the received hashes and trailer |
+| Independent checkpoint holder (step 6) | Keeps the final hash at log closure separately; the verifier compares the current tip with this original checkpoint |
+
+Keeping a checkpoint beside the records is insufficient if the person changing the records can replace it too. Step 6 assumes a different person holds the checkpoint. HMAC, signatures and time-stamps also depend on who holds keys and whether the verifier independently knows the closing time.
+
+This tool simulates all roles in the same browser. It does not send data to another person or save it as a file.
+
+**The stored record is distinct from the calculation input.** Record 2 contains the four fields in `09:05,Room-B,C-1002,IN`. Its input also includes the 64-character hash for record 1 and the separator `|`. Encode the complete joined string as UTF-8 bytes and pass it to SHA-256 to obtain the hash for record 2.
+
+The seed is SHA-256 of the header lines joined with LF. Excluding the header uses 64 zeros instead. Each record’s calculation hashes `previousHash + '|' + fields.join(',')`; the trailer hashes `lastHash + '|rows=' + count`.
+
+Hashes have 64 hexadecimal characters. The step-1 overview and result summaries show the first 8 followed by an ellipsis. Other compact rows show the first 8 characters of the preceding hash and the first 12 of the current hash. Expanding a row reveals the complete value. Records contain 4 ASCII fields of 1–64 characters each, up to 100 rows. Commas, pipes and control characters are rejected. Whitespace is not trimmed and Unicode is not normalized. HMAC mode retains the SHA-256 seed and uses HMAC-SHA256 for data rows and the trailer.
+
+The following results use the 8-row access log with its header and trailer. Operations target record 2; truncation removes the last 2 rows. A `-` means the remaining rows match but the original trailer does not. `pass` means verification succeeds after rechaining.
 
 | Operation ID | Operation | First mismatching row | After rechaining |
 |---|---|---|---|
@@ -90,9 +117,9 @@ The following results use the 8-row access log with its header and trailer. Oper
 | `insert` | Insert | 2 | pass |
 | `truncate` | Remove the last 2 rows | - | pass |
 | `header` | Rewrite the header | 1 | pass |
-| `rehashOne` | Recompute only the rewritten row | 3 | pass |
+| `rehashOne` | Update only the hash for the rewritten record | 3 | pass |
 
-Without a trailer, removing the last 2 rows passes. Rewriting and recomputing only the last row also passes without a trailer. A header excluded from the chain can change undetected. Different modifications can produce the same verification result, so the tool does not infer the modification type.
+Without a trailer, removing the last 2 rows passes. Rewriting only the last record and updating its hash also passes without a trailer. A header excluded from the chain can change undetected. Different modifications can produce the same verification result, so the tool does not infer the modification type.
 
 In the next table, ○ means detected and × means undetected. A different person holds the checkpoint. For time-stamps, the verifier knows the closing deadline independently of the log.
 
