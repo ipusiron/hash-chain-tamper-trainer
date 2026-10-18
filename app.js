@@ -820,6 +820,27 @@
     return block;
   }
 
+  function utf8InputExample(input, isRow) {
+    const bytes = new TextEncoder().encode(input);
+    const values = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'));
+    const block = node('div', undefined, 'visual-bytes');
+    block.append(node('h4', t('visual.bytes.title', {count:bytes.length})),
+      node('p', t('visual.bytes.note')));
+    const code = node('code', undefined, 'visual-byte-stream');
+    values.forEach((value, i) => {
+      if (i) code.append(' ');
+      code.append(node('span', value, 'visual-byte' + (isRow && i < 2 ? ' byte-character' : '') +
+        (isRow && i === 64 ? ' byte-separator' : '')));
+    });
+    block.append(code);
+    if (isRow) {
+      block.append(node('p', t('visual.bytes.characters', {a:input[0], b:input[1], x:values[0], y:values[1]})),
+        node('p', t('visual.bytes.parts', {record:bytes.length - 65, count:bytes.length})));
+    } else block.append(node('p', t('visual.bytes.header')));
+    block.append(node('p', t('visual.bytes.use', {count:bytes.length}), 'visual-byte-note'));
+    return block;
+  }
+
   function guideVisual() {
     const step = guide.step;
     const figure = visualFigure('visual.step.' + step);
@@ -848,7 +869,7 @@
       flow.append(visualCard(t('visual.calculate'), 'SHA-256', t('visual.encoding')),
         visualCard(t(n ? 'visual.outputRow' : 'visual.outputSeed', {n}), visualHash(hash)));
       const exact = node('details', undefined, 'visual-exact');
-      exact.append(node('summary', t('visual.exact')), node('code', input, 'visual-exact-input'));
+      exact.append(node('summary', t('visual.exact')), node('code', input, 'visual-exact-input'), utf8InputExample(input, n > 0));
       figure.append(flow, exact, node('p', t(n ? 'visual.next' : 'visual.seedNext', {n:n + 1}), 'visual-conclusion'));
       if (n === samples[0].rows.length) {
         figure.lastElementChild.textContent = t('visual.finish');

@@ -427,3 +427,12 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .build-status { font-weight: 700; }
 @media (min-width: 600px) { .build-rows { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .build-rows { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+
+.visual-bytes { margin-block-start: 1rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+.visual-bytes h4 { margin-block: 0 0.5rem; }
+.visual-bytes p { margin-block: 0.75rem; }
+.visual-byte-stream { display: block; padding: 0.75rem; background: var(--bg); line-height: 2; font-size: 1rem; white-space: normal; overflow-wrap: normal; }
+.visual-byte { display: inline-block; white-space: nowrap; }
+.byte-character { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.byte-separator { color: var(--warn-fg); background: var(--warn-bg); outline: 1px solid var(--warn-fg); font-weight: 700; }
+.visual-byte-note { font-weight: 600; }
