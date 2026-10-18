@@ -12,7 +12,7 @@
   const matrixSelection = { free: null, guide: null };
   const freeTabs = ['build', 'tamper', 'protect'];
   const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
-  const lessonRows = [4, 4, 4, 4, 4, 4, 5, 3, 4, 4, 4];
+  const lessonRows = [4, 4, 5, 4, 4, 4, 5, 3, 4, 4, 4];
   const quizAnswers = [1, 2, 0, 1, 2, 0, 1, 2];
   const retainedLessons = [7, 8, 9, 10];
   const quizDestinations = [{"step":4}, {"step":5}, {"step":6}, {"step":6}, {"step":1}, {"step":3}, {"lesson":7}, {"lesson":8}];
@@ -510,6 +510,25 @@
     return prerequisite;
   }
 
+  function lastRecordExample() {
+    const figure = visualFigure('record8.title');
+    figure.classList.add('last-record-example');
+    figure.append(node('p', t('record8.context')), node('p', t('record8.legend')));
+    const stages = node('div', undefined, 'visual-grid');
+    for (const stage of ['before', 'after']) {
+      const card = visualCard(t('record8.' + stage + '.title'));
+      card.dataset.stage = stage;
+      card.append(node('p', t('record8.stored', {hash: stage === 'before' ? 'A' : 'B'})),
+        node('p', t('record8.recomputed')));
+      const result = node('p');
+      result.append(node('strong', t('record8.' + stage + '.result')));
+      card.append(result);
+      stages.append(card);
+    }
+    figure.append(stages, node('p', t('record8.meaning')), node('p', t('record8.trailer')));
+    return figure;
+  }
+
   function lessonBody(lesson, content) {
     const prefix = 'lesson.' + (lesson + 1);
     const paragraphs = t(prefix + '.body').split('\n');
@@ -541,6 +560,7 @@
     }
     table.append(thead, tbody);
     content.append(table);
+    if (lesson === 2) content.append(lastRecordExample());
     const links = node('ul');
     lessonReferences[lesson].forEach(index => {
       const li = node('li');

@@ -119,7 +119,20 @@ The following results use the 8-row access log with its header and trailer. Oper
 | `header` | Rewrite the header | 1 | pass |
 | `rehashOne` | Update only the hash for the rewritten record | 3 | pass |
 
-Without a trailer, removing the last 2 rows passes. Rewriting only the last record and updating its hash also passes without a trailer. A header excluded from the chain can change undetected. Different modifications can produce the same verification result, so the tool does not infer the modification type.
+Without a trailer, removing the last 2 rows passes.
+
+For the last record, separate changing its contents from replacing its stored hash. Start from the original 8 records and change only record 8, leaving records 1–7 and the original trailer unchanged. A represents the hash from record 8's original input; B represents the hash from its changed input. A and B differ in this example.
+
+| Operation | Hash stored with record 8 | Hash recomputed during verification | Record 8 comparison |
+|---|---|---|---|
+| 1. Change only record 8's contents | Still A | B | Mismatch |
+| 2. Next, replace its stored hash with the recomputed value | Updated to B | B | Match |
+
+Stage 2 compares the stored B with the recomputed B, not the original A with the changed B. Records 1–7 are unchanged and no record follows record 8, so all record comparisons now pass.
+
+The original trailer was computed from `A|rows=8`. Verification computes it from `B|rows=8`, so retaining the original trailer produces a trailer mismatch. Without a trailer, verification passes. Steps 2 and 3 also show these two stages in a table and diagram.
+
+A header excluded from the chain can change undetected. Different modifications can produce the same verification result, so the tool does not infer the modification type.
 
 In the next table, ○ means detected and × means undetected. A different person holds the checkpoint. For time-stamps, the verifier knows the closing deadline independently of the log.
 
