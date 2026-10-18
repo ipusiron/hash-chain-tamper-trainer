@@ -42,7 +42,14 @@
       <section id="guide-task-section"><h3 data-i18n="guide.task"></h3><p class="multiline" id="guide-task"></p>
       <p id="guide-prepared" class="muted" data-i18n="guide.prepared" hidden></p>
       <div id="guide-options" class="check-options" hidden></div>
-      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
+      <div id="guide-build-progress" hidden>
+        <figure class="build-progress" aria-labelledby="guide-build-caption">
+          <figcaption id="guide-build-caption"></figcaption>
+          <ol id="guide-build-rows" class="build-rows"></ol>
+        </figure>
+        <p id="guide-build-status" class="build-status" role="status" aria-atomic="true"></p>
+      </div>
+      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-build-reset" data-i18n="guide.build.reset" hidden></button><button id="guide-build-next" data-i18n="guide.build.nextStep" hidden></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
       </section>
       <section id="guide-observation-section" class="guide-observation"><h3 data-i18n="guide.now"></h3><div id="guide-now" aria-live="polite"></div>
           <div id="guide-visual"></div></section>

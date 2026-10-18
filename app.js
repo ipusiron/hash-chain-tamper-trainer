@@ -66,7 +66,8 @@
       $('add-row').disabled = !state.base || state.base.rows.length >= 100;
       $('guide-back').disabled = guide.step === 1;
       $('guide-next').disabled = guide.step === 7;
-      $('guide-action').disabled = guide.step === 1 && guide.shown === 8;
+      $('guide-action').disabled = guide.step === 1 && guide.shown === samples[0].rows.length;
+      $('guide-build-reset').disabled = guide.shown === 0;
     }
     renderUnderstanding();
   }
@@ -984,12 +985,40 @@
     }
   }
 
+  function renderBuildProgress() {
+    const active = guide.step === 1;
+    const total = samples[0].rows.length;
+    $('guide-build-progress').hidden = !active;
+    $('guide-build-reset').hidden = !active;
+    $('guide-build-next').hidden = !active || guide.shown !== total;
+    if (!active) {
+      $('guide-action').removeAttribute('aria-describedby');
+      return;
+    }
+    $('guide-action').setAttribute('aria-describedby', 'guide-build-status');
+    $('guide-build-caption').textContent = t('guide.build.caption', {total});
+    const rows = samples[0].rows.map((row, i) => {
+      const status = i < guide.shown ? 'done' : i === guide.shown ? 'next' : 'waiting';
+      const item = node('li', undefined, 'build-row build-' + status);
+      item.dataset.status = status;
+      if (status === 'next') item.setAttribute('aria-current', 'step');
+      const symbol = node('span', status === 'done' ? '✓' : status === 'next' ? '●' : '○', 'build-symbol');
+      symbol.setAttribute('aria-hidden', 'true');
+      item.append(symbol, node('strong', t('guide.flowRow', {n:i + 1})), node('code', row[0]), node('span', t('guide.build.' + status)));
+      return item;
+    });
+    $('guide-build-rows').replaceChildren(...rows);
+    $('guide-build-status').textContent = t(guide.shown === total ? 'guide.build.finished' : 'guide.build.status', {done:guide.shown, total, n:guide.shown + 1});
+    $('guide-action').textContent = t(guide.shown === total ? 'guide.build.complete' : 'guide.build.calculate', {n:guide.shown + 1, total});
+  }
+
   function renderGuide() {
     const step = guide.step;
     $('guide-heading').textContent = t('guide.' + step + '.title');
     renderGuideExplanation();
     $('guide-task').textContent = t('guide.' + step + '.task');
     $('guide-action').textContent = t('guide.' + step + '.action');
+    renderBuildProgress();
     $('guide-counter').textContent = t('guide.counter', {n:step});
     $('guide-progress').value = step;
     $('guide-progress').setAttribute('aria-label', t('guide.counter', {n:step}));
@@ -1190,6 +1219,15 @@
   wideSteps.addEventListener('change',stepLayout);
   stepLayout();
   $('guide-action').addEventListener('click', () => perform(runGuide));
+  $('guide-build-reset').addEventListener('click', async () => {
+    await perform(async () => {
+      const empty = await core.createChain({headers:samples[0].headers, rows:[]}, {hasTrailer:false});
+      guide.partial = empty;
+      guide.shown = 0;
+    });
+    if (!state.error) $('guide-action').focus();
+  });
+  $('guide-build-next').addEventListener('click', () => chooseGuide(2, true));
   $('guide-next').addEventListener('click', () => chooseGuide(Math.min(7,guide.step + 1),true));
   $('guide-back').addEventListener('click', () => chooseGuide(Math.max(1,guide.step - 1),true));
   $('guide-reset').addEventListener('click', () => {
