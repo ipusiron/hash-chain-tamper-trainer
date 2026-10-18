@@ -882,6 +882,44 @@
     return block;
   }
 
+  function visualChainComparison(result, stage) {
+    const block = node('div', undefined, 'visual-row-group chain-comparison');
+    block.dataset.stage = String(stage);
+    block.append(node('strong', t('compare.title.' + stage), 'visual-label'),
+      node('p', t('compare.note.' + stage)));
+    const headings = node('div', undefined, 'comparison-headings');
+    headings.append(node('strong', t('compare.left.' + stage)),
+      node('span', t('compare.judge')), node('strong', t('compare.right')));
+    const list = node('ol', undefined, 'visual-rows comparison-rows');
+    for (const row of result.rows) {
+      const li = node('li', undefined, 'comparison-row');
+      li.dataset.row = String(row.number);
+      li.dataset.status = row.valid ? 'pass' : 'fail';
+      li.append(node('strong', t('visual.row', {n:row.number}), 'comparison-record'));
+      const stored = node('div', undefined, 'comparison-cell comparison-stored');
+      const recalculated = node('div', undefined, 'comparison-cell comparison-recalculated');
+      for (const [cell, label, hash] of [[stored, 'compare.stored', row.actual], [recalculated, 'compare.recalculated', row.expected]]) {
+        const value = node('code', shortHash(hash), 'comparison-hash');
+        value.title = hash;
+        cell.append(node('span', t(label), 'comparison-cell-label'), value);
+      }
+      const status = node('div', undefined, 'comparison-status');
+      const symbol = node('span', row.valid ? '=' : '≠', 'comparison-symbol');
+      symbol.setAttribute('aria-hidden', 'true');
+      status.append(symbol, node('strong', t('visual.status.' + (row.valid ? 'pass' : 'fail'))));
+      const full = node('details', undefined, 'comparison-full');
+      full.append(node('summary', t('compare.full', {n:row.number})));
+      const pair = node('div', undefined, 'visual-grid');
+      pair.append(visualCard(t('compare.stored'), visualHash(row.actual)),
+        visualCard(t('compare.recalculated'), visualHash(row.expected)));
+      full.append(pair);
+      li.append(stored, status, recalculated, full);
+      list.append(li);
+    }
+    block.append(headings, list, node('p', t('compare.display'), 'muted'));
+    return block;
+  }
+
   function utf8InputExample(input, isRow) {
     const bytes = new TextEncoder().encode(input);
     const values = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'));
@@ -952,8 +990,8 @@
         figure.append(node('p', t('visual.plan.' + step), 'visual-conclusion'));
         return figure;
       }
-      if (step === 4) figure.append(visualRows(guide.results[3], t('visual.beforeRebuild')));
-      figure.append(visualRows(result, t('visual.actualResults')));
+      if (step === 4) figure.append(visualChainComparison(guide.results[3], 3));
+      figure.append(visualChainComparison(result, step));
       if (step < 4) {
         const mismatch = result.rows[result.firstMismatch - 1];
         const hashes = node('div', undefined, 'visual-grid');

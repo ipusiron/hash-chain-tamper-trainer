@@ -458,3 +458,26 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .byte-character { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .byte-separator { color: var(--warn-fg); background: var(--warn-bg); outline: 1px solid var(--warn-fg); font-weight: 700; }
 .visual-byte-note { font-weight: 600; }
+
+/* Each verdict sits between the stored and recalculated hash for one record. */
+.comparison-headings { display: grid; gap: 0.5rem; padding: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+.comparison-headings > span { font-size: 0.875rem; }
+.visual-rows.comparison-rows { grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
+.comparison-row { min-width: 0; display: grid; gap: 0.5rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
+.comparison-record, .comparison-full { grid-column: 1 / -1; }
+.comparison-cell { min-width: 0; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+.comparison-cell-label { display: block; font-size: 0.875rem; }
+.comparison-hash { display: block; font-size: 1rem; font-weight: 700; margin-block-start: 0.2rem; }
+.comparison-status { display: flex; gap: 0.5rem; justify-content: center; align-items: center; padding: 0.35rem; border: 1px solid; border-radius: 4px; }
+.comparison-symbol { font-size: 1.5rem; line-height: 1; }
+.comparison-status strong { font-size: 0.875rem; color: inherit; }
+.comparison-row[data-status="pass"] .comparison-status { color: var(--ok-fg); background: var(--ok-bg); }
+.comparison-row[data-status="fail"] .comparison-status { color: var(--warn-fg); background: var(--warn-bg); }
+.comparison-full { margin-block: 0.25rem 0; }
+.comparison-full .visual-grid { padding: 0.5rem; }
+@media (min-width: 700px) {
+  .comparison-headings, .comparison-row { grid-template-columns: minmax(0, 1fr) 7rem minmax(0, 1fr); }
+  .comparison-headings { align-items: center; }
+  .comparison-headings > span { text-align: center; }
+  .comparison-status { flex-direction: column; }
+}
