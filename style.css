@@ -356,6 +356,28 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .lesson-points { padding-inline-start: 1.5rem; }
 .lesson-points li { margin-block: 0.65rem; }
 
+.chain-overview { margin: 1.25rem 0; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+.chain-overview figcaption { font-size: 1.125rem; font-weight: 700; }
+.overview-layout, .overview-people { display: grid; gap: 1rem; align-items: start; }
+.overview-bundle, .overview-person { min-width: 0; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+.overview-bundle > strong, .overview-person > strong { color: var(--accent); }
+.overview-part { padding: 0.65rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
+.overview-part pre { white-space: pre-wrap; margin-block: 0.5rem 0; }
+.overview-records { padding: 0; list-style: none; display: grid; gap: 0.5rem; margin-block: 0.5rem; }
+.overview-pair { min-width: 0; display: grid; gap: 0.5rem; padding: 0.65rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
+.overview-pair > div { min-width: 0; }
+.overview-pair code, .overview-trailer code { display: block; }
+.overview-pair code { margin-block-start: 0.2rem; }
+.overview-pair [class="muted"] { display: block; }
+.overview-independent { border-style: dashed; }
+.overview-person ol { padding-inline-start: 1.5rem; }
+.overview-person li { margin-block: 0.5rem; }
+.overview-jump { margin-block-start: 0.75rem; width: fit-content; max-width: 100%; }
+@media (min-width: 700px) {
+  .overview-layout { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+  .overview-pair { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+}
+
 .sample-illustration { margin: 1.25rem 0; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
 .sample-illustration figcaption { font-weight: 700; margin-block-end: 0.75rem; }
 .sample-illustration-layout { display: grid; gap: 1rem; align-items: center; }
