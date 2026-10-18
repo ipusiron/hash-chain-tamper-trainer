@@ -54,7 +54,7 @@ Step 1 starts its prerequisites with the card-access illustration and a data ove
 The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Prerequisites are open from the start and include links to related tools.
 
 1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
-2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. The first mismatch is the hash comparison for record 2.
+2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. Compare the original chain’s hashes with hashes recalculated from the changed records, record by record. Expand any record to compare all 64 characters.
 3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3.
 4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records, alongside the failing step-3 result.
 5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails.
