@@ -895,8 +895,8 @@
       if (step < 4) {
         const mismatch = result.rows[result.firstMismatch - 1];
         const hashes = node('div', undefined, 'visual-grid');
-        hashes.append(visualCard(t('visual.expectedAt', {n:result.firstMismatch}), visualHash(mismatch.expected)),
-          visualCard(t('visual.storedAt', {n:result.firstMismatch}), visualHash(mismatch.actual)));
+        hashes.append(visualCard(t('visual.storedAt', {n:result.firstMismatch}), visualHash(mismatch.actual)),
+          visualCard(t('visual.expectedAt', {n:result.firstMismatch}), visualHash(mismatch.expected)));
         figure.append(hashes);
       }
       figure.append(node('p', t('visual.result.' + step), 'visual-conclusion'));
