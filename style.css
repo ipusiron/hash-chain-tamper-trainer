@@ -414,3 +414,16 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
   .visual-calculation { grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr) minmax(0, 1fr); align-items: start; }
   .visual-rows { grid-template-columns: repeat(8, minmax(0, 1fr)); }
 }
+
+/* The numbered cards show calculation progress, not navigation controls. */
+.build-progress { margin: 1rem 0; }
+.build-progress figcaption { font-weight: 700; margin-block-end: 0.75rem; }
+.build-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; padding: 0; list-style: none; }
+.build-row { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; min-width: 0; padding: 0.65rem 0.35rem; border: 1px dashed var(--border); background: var(--surface); text-align: center; }
+.build-row > span:last-child { font-size: 0.875rem; }
+.build-symbol { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.build-done { border: 1px solid var(--ok-fg); color: var(--ok-fg); background: var(--ok-bg); }
+.build-next { border: 3px solid var(--accent); color: var(--accent); background: var(--bg); padding: calc(0.65rem - 2px) calc(0.35rem - 2px); }
+.build-status { font-weight: 700; }
+@media (min-width: 600px) { .build-rows { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .build-rows { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
