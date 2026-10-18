@@ -560,7 +560,7 @@
   });
   $('lesson-try').addEventListener('click', () => showTab('protect', true));
 
-  const guide = { step: 1, base: null, partial: null, shown: 0, modified: null, single: null, rebuilt: null,
+  const guide = { step: 1, base: null, partial: null, firstHash: null, shown: 0, modified: null, single: null, rebuilt: null,
     results: {}, selected: [], matrix: null, quizOpen: false, prepared: false };
   const guideSources = [[0, 1], [2], [2], [4, 5], [3], [6], []];
   const guidePrerequisites = [[0, 1], [0, 2], [2], [4, 5], [3], [6], []];
@@ -882,8 +882,8 @@
       const before = samples[0].rows[1];
       const after = guide.modified ? guide.modified.rows[1].fields : before.map((value, i) => i ? value : '09:06');
       const pair = node('div', undefined, 'visual-grid');
-      pair.append(visualCard(t('visual.recordBefore'), before.join(',')),
-        visualCard(t('visual.recordAfter'), after.join(','), t('visual.changeTime')));
+      pair.append(visualCard(t('visual.recordBefore'), core.hashInput(guide.firstHash, before)),
+        visualCard(t('visual.recordAfter'), core.hashInput(guide.firstHash, after), t('visual.changeTime')));
       figure.append(pair);
       const result = guide.results[step];
       if (!result) {
@@ -1270,5 +1270,6 @@
   } else perform(async () => {
     await rebuild();
     guide.partial = await core.createChain({headers:samples[0].headers, rows:[]}, {hasTrailer:false});
+    guide.firstHash = await core.sha256(core.hashInput(guide.partial.seed, samples[0].rows[0]));
   });
 }());
