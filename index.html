@@ -41,7 +41,10 @@
       <section id="guide-prerequisites" class="prerequisite"><h3 data-i18n="lesson.prerequisite"></h3><div id="guide-background"></div></section>
       <section id="guide-task-section"><h3 data-i18n="guide.task"></h3><p class="multiline" id="guide-task"></p>
       <p id="guide-prepared" class="muted" data-i18n="guide.prepared" hidden></p>
+      <div id="guide-state" class="experiment-state" hidden></div>
+      <div id="guide-prediction"></div>
       <div id="guide-options" class="check-options" hidden></div>
+      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-build-reset" data-i18n="guide.build.reset" hidden></button><button id="guide-build-next" data-i18n="guide.build.nextStep" hidden></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
       <div id="guide-build-progress" hidden>
         <figure class="build-progress" aria-labelledby="guide-build-caption">
           <figcaption id="guide-build-caption"></figcaption>
@@ -49,15 +52,16 @@
         </figure>
         <p id="guide-build-status" class="build-status" role="status" aria-atomic="true"></p>
       </div>
-      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-build-reset" data-i18n="guide.build.reset" hidden></button><button id="guide-build-next" data-i18n="guide.build.nextStep" hidden></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
       <button id="guide-overview-jump" class="overview-jump" type="button" data-i18n="overview.jump" hidden></button>
       </section>
       <section id="guide-observation-section" class="guide-observation"><h3 data-i18n="guide.now"></h3><div id="guide-now" aria-live="polite"></div>
+          <div id="guide-meaning"></div>
           <div id="guide-visual"></div></section>
       <div id="guide-result"></div>
       <div id="guide-quiz" hidden>    <section id="panel-quiz" data-i18n-label="tab.quiz" hidden>
       <h2 data-i18n="tab.quiz"></h2>
       <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
+      <p id="quiz-level" class="quiz-level"></p>
       <h3 id="quiz-prompt"></h3><div id="quiz-choices" class="quiz-choices"></div>
       <div id="quiz-feedback" aria-live="polite"></div>
       <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
@@ -114,13 +118,15 @@
         <div><label for="operation" data-i18n="operation"></label><select id="operation"></select></div>
         <div><label for="target-row" data-i18n="targetRow"></label><select id="target-row"></select></div>
         <div><label for="target-column" data-i18n="column"></label><select id="target-column"></select></div>
-        <div><label for="new-value" data-i18n="newValue"></label><input id="new-value" value="CHANGED" maxlength="64" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="tamper-fields-note"></div>
+        <div><label for="new-value" data-i18n="newValue"></label><input id="new-value" value="09:06" maxlength="64" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="tamper-fields-note"></div>
         <div><label for="cut-count" data-i18n="cutCount"></label><input id="cut-count" type="number" value="2" min="1" max="8" autocomplete="off"></div>
       </div>
       <p id="tamper-fields-note" class="muted" data-i18n="fieldsNote"></p>
       <div class="actions"><button id="apply-tamper" data-i18n="applyTamper"></button><button id="verify" data-i18n="verify"></button><button id="reset-tamper" data-i18n="resetTamper"></button></div>
       <div id="tamper-result" aria-live="polite"></div><p class="muted" data-i18n="noInference"></p>
-      <div id="tampered-chain"></div>
+      <p data-i18n="clarity.freeReset" class="muted"></p>
+      <div id="free-comparison"></div>
+      <details class="learning-details"><summary data-i18n="clarity.rows"></summary><div id="tampered-chain"></div></details>
     </section>
     <section id="panel-protect" role="tabpanel" aria-labelledby="tab-protect" hidden>
       <h2 data-i18n="protect.title"></h2><p data-i18n="rechainIntro"></p>

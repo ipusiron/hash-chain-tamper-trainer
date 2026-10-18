@@ -481,3 +481,31 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
   .comparison-headings > span { text-align: center; }
   .comparison-status { flex-direction: column; }
 }
+
+/* Show the essential experiment first; keep supporting detail available in place. */
+.learning-details { margin-block: 0.75rem; }
+.learning-details > :not(summary) { margin-inline: 0.75rem; }
+.learning-details > summary { font-weight: 600; }
+.result-meaning, .experiment-state { padding: 0.75rem; margin-block: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
+.result-meaning p, .experiment-state p { margin-block: 0.5rem; }
+.learning-criterion { font-size: 0.875rem; color: var(--muted); border-block-start: 1px dashed var(--border); padding-block-start: 0.5rem; margin-block-end: 0; }
+.sample-scene { max-width: 26rem; margin-inline: auto; }
+.sample-illustration { margin-block: 0.75rem; }
+.propagation-prefix, .propagation-output, .propagation-fields { display: block; font-size: 1rem; overflow-wrap: anywhere; }
+.propagation-prefix { padding: 0.5rem; color: var(--warn-fg); background: var(--warn-bg); border-inline-start: 4px solid var(--warn-fg); font-weight: 700; }
+.propagation-fields { padding: 0.5rem; border: 1px solid var(--border); background: var(--bg); }
+.propagation h4, .trailer-comparison h4 { margin-block: 0 0.5rem; }
+.matrix-result button { width: 100%; text-align: start; }
+.matrix-evidence:empty { display: none; }
+.matrix-evidence { margin-block: 1rem; padding: 0.75rem; border: 2px solid var(--accent); border-radius: 4px; background: var(--bg); }
+.evidence-check { padding-block: 0.5rem; border-block-start: 1px solid var(--border); }
+.evidence-check h4 { margin-block: 0.5rem; }
+.prediction-choice { display: inline-flex; margin-inline-end: 0.5rem; }
+.prediction-choice input { width: 44px; height: 44px; }
+fieldset { min-width: 0; border: 1px solid var(--border); }
+legend { max-width: 100%; }
+.quiz-level { font-weight: 700; color: var(--accent); }
+.tool-context { flex-basis: 100%; }
+.guide-background-part p { margin-block: 0.75rem; }
+
+.lesson-visual .lesson-visual { margin-inline: 0; padding: 0; border: 0; background: transparent; }
