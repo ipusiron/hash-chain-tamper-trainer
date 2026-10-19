@@ -6,6 +6,7 @@
   const $ = id => document.getElementById(id);
   const tabs = ['guide', 'free', 'learn', 'settings'];
   const position = { stage: 2, hasTrailer: true, cases: [] };
+  const inlinePositions = new Map();
   const learningModel = window.HashChainLearning;
   const learning = learningModel.create();
   let learningNotice = '';
@@ -514,14 +515,72 @@
   }
 
   function positionGuideLink() {
-    const compare = node('button', t('position.open'));
+    const step = guide.step;
+    if (!inlinePositions.has(step)) inlinePositions.set(step, {open: false, stage: 2, hasTrailer: true});
+    const view = inlinePositions.get(step);
+    const prefix = 'inline-position-' + step;
+    const wrapper = node('div', undefined, 'position-inline');
+    const compare = node('button');
     compare.type = 'button';
-    compare.addEventListener('click', () => {
-      chooseGuide(3, true);
-      if (guide.results[3]) $('guide-position-heading').focus();
-      else $('guide-action').focus();
-    });
-    return compare;
+    compare.id = prefix + '-toggle';
+    compare.setAttribute('aria-controls', prefix);
+    const indicator = node('span', '', 'position-disclosure-indicator');
+    indicator.setAttribute('aria-hidden', 'true');
+    compare.append(indicator, document.createTextNode(t('position.open')));
+    const panel = node('section', undefined, 'position-inline-panel');
+    panel.id = prefix;
+    panel.setAttribute('aria-label', t('position.title'));
+    let initialized = false;
+
+    function preparePanel() {
+      panel.append(node('p', t('position.inlineIntro')), node('p', t('diagram.reading'), 'diagram-reading'));
+      const controls = node('div', undefined, 'position-controls');
+      const stages = node('div', undefined, 'position-stages');
+      stages.setAttribute('role', 'group');
+      stages.setAttribute('aria-label', t('position.choose'));
+      const buttons = [];
+      for (let i = 0; i < 3; i += 1) {
+        const button = node('button', t('position.stage.' + i));
+        button.type = 'button';
+        button.addEventListener('click', () => { view.stage = i; update(); });
+        buttons.push(button);
+        stages.append(button);
+      }
+      const label = node('label', undefined, 'check-option');
+      const trailer = node('input');
+      trailer.type = 'checkbox';
+      trailer.addEventListener('change', () => { view.hasTrailer = trailer.checked; update(); });
+      label.append(trailer, node('span', t('position.trailerOption')));
+      const reset = node('button', t('position.inlineReset'));
+      reset.type = 'button';
+      reset.addEventListener('click', () => { view.stage = 2; view.hasTrailer = true; update(); });
+      controls.append(stages, label, reset);
+      const status = node('p', undefined, 'position-stage-note');
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-atomic', 'true');
+      const cases = node('div', undefined, 'position-cases');
+      const conclusion = node('p', undefined, 'visual-conclusion');
+      panel.append(controls, status, cases, conclusion, node('p', t('position.limit'), 'muted'));
+      function update() {
+        buttons.forEach((button, i) => button.setAttribute('aria-pressed', String(view.stage === i)));
+        trailer.checked = view.hasTrailer;
+        status.textContent = t('position.state.' + view.stage);
+        conclusion.textContent = t('position.conclusion.' + view.stage + (view.hasTrailer ? '.with' : '.without'));
+        renderPositionCases(cases, view, prefix + '-');
+      }
+      update();
+      initialized = true;
+    }
+    function toggle() {
+      if (view.open && !initialized) preparePanel();
+      compare.setAttribute('aria-expanded', String(view.open));
+      indicator.textContent = view.open ? '▼' : '▶';
+      panel.hidden = !view.open;
+    }
+    compare.addEventListener('click', () => { view.open = !view.open; toggle(); });
+    toggle();
+    wrapper.append(compare, panel);
+    return wrapper;
   }
 
   async function preparePosition() {
@@ -590,14 +649,14 @@
     card.append(exact);
   }
 
-  function positionRecord(row, fields, target) {
+  function positionRecord(row, target, stage) {
     const card = node('div', undefined, 'position-record' + (target ? ' position-target' : ''));
     card.dataset.record = String(row.number);
     card.append(node('h6', t(target ? 'position.target' : 'position.next', {n:row.number})),
       positionInput(row.input, row.number));
     positionCalculation(card, row.input, row.actual, row.expected, row.valid);
-    const note = position.stage === 0 ? 'diagram.note.original' : target
-      ? 'diagram.note.target.' + position.stage : 'diagram.note.next';
+    const note = stage === 0 ? 'diagram.note.original' : target
+      ? 'diagram.note.target.' + stage : 'diagram.note.next';
     card.append(node('p', t(note), 'diagram-callout'));
     return card;
   }
@@ -628,13 +687,16 @@
     $('position-trailer').checked = position.hasTrailer;
     $('position-status').textContent = t('position.state.' + position.stage);
     $('position-conclusion').textContent = t('position.conclusion.' + position.stage + (position.hasTrailer ? '.with' : '.without'));
-    const container = $('position-cases');
+    renderPositionCases($('position-cases'), position);
+  }
+
+  function renderPositionCases(container, view, prefix = '') {
     container.replaceChildren();
     for (const item of position.cases) {
       const {index, base} = item;
-      const chain = item.stages[position.stage];
-      const result = item.results[position.stage][position.hasTrailer ? 'withTrailer' : 'withoutTrailer'];
-      const all = item.results[position.stage].withTrailer;
+      const chain = item.stages[view.stage];
+      const result = item.results[view.stage][view.hasTrailer ? 'withTrailer' : 'withoutTrailer'];
+      const all = item.results[view.stage].withTrailer;
       const last = index === base.rows.length - 1;
       const block = node('section', undefined, 'position-case');
       block.dataset.case = last ? 'last' : 'middle';
@@ -644,30 +706,30 @@
       figure.classList.add('position-flow');
       figure.append(comparisonLegend());
       figure.append(node('p', t(last ? 'position.unchangedLast' : 'position.unchangedMiddle'), 'position-unchanged'),
-        positionRecord(result.rows[index], chain.rows[index].fields, true));
+        positionRecord(result.rows[index], true, view.stage));
       if (!last) {
-        figure.append(positionArrow(t('position.forward')), positionRecord(result.rows[index + 1], chain.rows[index + 1].fields, false),
+        figure.append(positionArrow(t('position.forward')), positionRecord(result.rows[index + 1], false, view.stage),
           node('p', t('position.remaining', {count:result.rows.slice(index + 2).filter(row => !row.valid).length}), 'position-remaining'));
       } else figure.append(node('p', t('position.noNext'), 'position-no-next'));
       figure.append(positionArrow(t(last ? 'position.toTrailer' : 'position.afterRemaining')));
       const trailer = node('div', undefined, 'position-trailer');
       trailer.append(node('h6', t('position.trailer')));
-      if (position.hasTrailer) {
+      if (view.hasTrailer) {
         const input = core.trailerInput(all.rows[7].expected, all.rows.length);
         trailer.append(positionInput(input, 0));
         positionCalculation(trailer, input, all.trailer.actual, all.trailer.expected, all.trailer.valid, true);
-        trailer.append(node('p', t(position.stage === 0 ? 'diagram.note.original' : 'diagram.note.trailer'), 'diagram-callout'));
+        trailer.append(node('p', t(view.stage === 0 ? 'diagram.note.original' : 'diagram.note.trailer'), 'diagram-callout'));
       } else trailer.append(node('p', t('position.noTrailer')));
       const overall = node('p', t(result.valid ? 'position.pass' : 'position.fail'), 'position-overall ' + (result.valid ? 'good' : 'bad'));
       overall.dataset.valid = String(result.valid);
       figure.append(trailer, overall);
       const snapshot = node('section', undefined, 'position-snapshot');
       snapshot.append(node('h6', t('position.snapshot')),
-        node('p', t(position.stage === 0 ? 'position.recordSame' : 'position.recordDifferent', {n:index + 1})),
+        node('p', t(view.stage === 0 ? 'position.recordSame' : 'position.recordDifferent', {n:index + 1})),
         positionPair(t('position.originalHash'), base.rows[index].hash, t('position.currentHash'), chain.rows[index].hash,
           base.rows[index].hash === chain.rows[index].hash),
-        node('p', t('position.snapshotNote.' + position.stage)));
-      const details = disclosure('position-detail-' + index, 'position.details', visualChainComparison(result, 'free'));
+        node('p', t('position.snapshotNote.' + view.stage)));
+      const details = disclosure(prefix + 'position-detail-' + index, 'position.details', visualChainComparison(result, 'free'));
       const trailerDetails = node('div', undefined, 'position-trailer-detail');
       const oldInput = core.trailerInput(base.rows[7].hash, 8);
       const newInput = core.trailerInput(all.rows[7].expected, 8);
@@ -677,7 +739,7 @@
         comparisonInput(newInput, oldInput, 'second'),
         comparisonTone(visualCard(t('position.originalTrailer'), visualHash(all.trailer.actual)), all.trailer.actual, all.trailer.expected, 'first'),
         comparisonTone(visualCard(t('position.recomputedTrailer'), visualHash(all.trailer.expected)), all.trailer.expected, all.trailer.actual, 'second'),
-        node('p', t(position.hasTrailer ? 'position.trailerUsed' : 'position.trailerNotUsed')));
+        node('p', t(view.hasTrailer ? 'position.trailerUsed' : 'position.trailerNotUsed')));
       details.append(visualCard(t('position.originalHash'), visualHash(base.rows[index].hash)), trailerDetails);
       block.append(figure, snapshot, details);
       container.append(block);
