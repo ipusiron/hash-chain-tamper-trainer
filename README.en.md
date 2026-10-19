@@ -55,9 +55,11 @@ Japanese, English, and light and dark themes are supported. Language changes pre
 
 Step 1 starts with the card-access illustration and a visible diagram separating the record, calculation input string, and output hash. It introduces the record/hash pair, the hash recalculated during verification, and the difference between comparing and updating. Record 1’s output appears only after its calculation button is pressed. Expand the supporting material to inspect the format and data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
 
+Each step has a dedicated diagram below its aim. Step 1 connects the output hash directly to the next input. Steps 2–4 distinguish input construction, calculation, replacement of stored hashes, and verification recomputation, tracing both comparison operands to their sources. Step 5 removes records 7–8 together with their hashes while retaining the original eight-record trailer. Step 6 shows each rebuilder’s available keys and the data handed to verification. Step 7 separates comparisons of record hashes, trailers and independent checkpoints. Actual hashes and results appear after the action.
+
 The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Brief prerequisites are visible from the start; expand the supporting explanation and related tools in place. Steps 1–6 offer optional predictions that you can compare with the result. Predictions and disclosure states are not saved.
 
-1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
+1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and the final hash/trailer pair to keep as an independent checkpoint. Restart from record 1 at any time.
 2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. Compare the original chain’s hashes with hashes recalculated from the changed records, record by record. Expand any record to compare all 64 characters.
 3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same. Then use the input/output diagram and real values to compare the same action on the last record, 8.
 4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records and expand the step-3 comparison. A note beside the result distinguishes internal consistency from being unchanged since the original log.
@@ -67,7 +69,7 @@ The Learning path opens first. Read the aim and prerequisites, then use the main
 
 Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
 
-A dedicated diagram below each step’s aim uses boxes, arrows and callouts to show records, inputs, hashes and comparison targets. These seven overview diagrams describe the operations; actual values and verdicts appear in the calculation results. Each step’s aim identifies the records, the specific edit, and the values to compare, so the experiment’s conditions are clear even when you start at that step. Each step distinguishes changing a record, updating its stored hash, and comparing values during verification. The trailer example keeps the original trailer for comparison, and the protection examples identify who holds the keys and the independent checkpoint.
+Each step’s aim identifies the records, the specific edit, and the values to compare, so the experiment’s conditions are clear even when you start at that step. Each step distinguishes changing a record, updating its stored hash, and comparing values during verification. The trailer example keeps the original trailer for comparison, and the protection examples identify who holds the keys and the independent checkpoint.
 
 Each section heading has its own "I understand" checkbox. The aim, prerequisites, task, observation, individual explanation headings and takeaway form 44 independent sections across the seven steps. Checked sections have a green background and an Understood label. Actions and quiz answers never check them automatically, and you can move on without checking them. The step list shows partial counts for each step. Each heading includes a criterion describing what you should be able to explain.
 
@@ -113,7 +115,7 @@ Bundle held by the recorder
 |---|---|
 | Recorder | Keeps the bundle above and gives it to the verifier |
 | Verifier | Receives the bundle, recomputes from the header onward, and compares with the received hashes and trailer |
-| Independent checkpoint holder (step 6) | Keeps the final hash at log closure separately; the verifier compares the current tip with this original checkpoint |
+| Independent checkpoint holder (step 6) | Separately keeps the final hash and trailer, including the count, at log closure; the verifier compares each current value with its original counterpart |
 
 Keeping a checkpoint beside the records is insufficient if the person changing the records can replace it too. Step 6 assumes a different person holds the checkpoint. HMAC, signatures and time-stamps also depend on who holds keys and whether the verifier independently knows the closing time.
 
