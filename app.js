@@ -1806,7 +1806,7 @@
     $('panel-quiz').hidden = !guide.quizOpen;
     $('guide-prepared').hidden = !guide.prepared || step < 2 || step > 4;
     const done = step === 1 ? guide.shown > 0 : step === 6 ? !!guide.matrix : step === 7 ? Object.keys(state.answers).length > 0 : !!guide.results[step];
-    $('guide-takeaway').hidden = !done;
+    $('guide-takeaway-preview').hidden = done;
     emphasizeTakeaway($('guide-understood'), step);
     const output = $('guide-result');
     output.replaceChildren();
