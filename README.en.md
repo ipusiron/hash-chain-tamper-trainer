@@ -83,6 +83,8 @@ Diagrams show the status of all 8 rows, tail deletion, and the people who hold k
 
 Step 3 embeds the Middle vs last input/output diagrams in What just happened. Arrows connect each input string, UTF-8 encoding, SHA-256 and output. The output and stored hash appear side by side, with callouts explaining each match or mismatch. Arrows also show the output feeding the next record or trailer input. Expand the full input and every byte in place. Two original copies let you replay 0 original, 1 change only the contents, and 2 also update that record’s stored hash. It opens at stage 2, matching the Step 3 action; stage 1 revisits Step 2.
 
+Within each diagram, the complete hash cells, including their labels, are colored. A match makes both green; a mismatch makes the output blue and the stored hash orange. A solid verdict bar and an orange record or trailer outline emphasize a mismatch. These colors compare the two hashes within each diagram, not record 2 against record 8.
+
 Toggle whether the original trailer is included. At stage 2, both target records match, but record 3 mismatches in the middle case and the original trailer mismatches in the last-record case. Excluding the trailer lets the last-record case pass without making it identical to the original. A separate comparison below each diagram shows changes from the original; expand all eight inputs and full hashes for details.
 
 Return to this step’s comparison restores stage 2 with the original trailer included. These controls do not change the record-2 experiment carried into Step 4. Continue to Step 4 to update the stored hashes for records 3–8 and the trailer as well.

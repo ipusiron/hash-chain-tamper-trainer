@@ -614,3 +614,10 @@ code.compare-value, .comparison-color-keys .compare-value { padding: 0.25rem; bo
 .position-disclosure-indicator { display: inline-block; width: 1.25em; }
 .position-inline-panel { margin-block-start: 1rem; padding-block-start: 0.75rem; border-block-start: 1px solid var(--border); }
 .position-inline-panel .position-case { margin-block: 0; }
+
+/* Color each complete comparison cell and make a failed verdict unmistakable. */
+.position-pair .position-value.compare-value { padding: 0.375rem; border-width: 2px; border-radius: 4px; }
+.position-pair .position-value code.compare-value { color: inherit; background: transparent; border: 0; padding: 0; }
+.position-verdict.bad { color: var(--warn-bg); background: var(--warn-fg); border: 2px solid var(--warn-fg); font-weight: 700; }
+.position-record[data-valid="false"], .position-trailer[data-valid="false"] { border-color: var(--warn-fg); }
+.position-record[data-valid="true"], .position-trailer[data-valid="true"] { border-color: var(--ok-fg); }
