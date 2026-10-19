@@ -73,6 +73,8 @@ Each section heading has its own "I understand" checkbox. The aim, prerequisites
 
 Related tools have link buttons labeled "Open tool (new tab)" in the prerequisites and at the end of the corresponding explanation.
 
+The takeaway is always visible as a summary, including before the action. A note identifies the preview before execution. Every section can be checked independently of actions, so checking all headings completes that step’s count. Experiment results and quiz answers never check sections automatically.
+
 In Settings, "Save understanding checks in this browser" is on by default. Turning it off removes saved checks while retaining the current checks until you reload. Turning it back on saves the current checks. "Clear all understanding checks" asks for confirmation and clears only the checks, preserving the language, saving preference, experiment data and quiz answers. Cancel or Esc dismisses the confirmation. Previous whole-step checks remain listed in Settings; individual section checks start unchecked. Clearing all checks also clears those previous records.
 
 Free experiment provides build, tamper and protection experiments. Changing sample, header or trailer settings rebuilds the original chain; each modification begins from its copy. Protection comparisons use a common row-2 rewrite. These records are independent of the Learning path. Verification pairs each stored hash with its recalculated hash. Expand a record to inspect the actual verification input and the hash produced from that input.
@@ -304,3 +306,5 @@ This tool is part of the 200 Security Tools with Generative AI project.
 The project uses AI assistance to create and publish a variety of security tools over 100 days.
 
 See the [project page](https://akademeia.info/?page_id=44607) for details and other tools.
+
+Step 5 deletes records 7–8 and their stored hashes from the original log. It separates checking the six remaining record hashes from also checking the retained eight-record trailer. A trailer hashes the last hash and count; the six-record and original eight-record trailers are compared. Question 1 specifies record 2’s 09:05→09:06 alteration and replacement of stored hashes for records 2–8 and the trailer.
