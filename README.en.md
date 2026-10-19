@@ -87,6 +87,8 @@ Toggle whether the original trailer is included. At stage 2, both target records
 
 Return to this step’s comparison restores stage 2 with the original trailer included. These controls do not change the record-2 experiment carried into Step 4. Continue to Step 4 to update the stored hashes for records 3–8 and the trailer as well.
 
+In the explanations for Steps 2 and 3, “Compare middle and last here” opens the same diagrams directly below the button. It preserves the current step, experiment results and scroll position. Keyboard focus also stays on the button. Press it again to close. Its stage and trailer selections are independent of the comparison in the Step 3 result.
+
 ## 🔬 Chain format and verification results
 
 This tool keeps records paired with their corresponding hashes, as shown below. This is a content structure, not a universal CSV or JSON specification. File formats, storage locations and access policies are deployment choices; neither records nor hashes need to be made public.

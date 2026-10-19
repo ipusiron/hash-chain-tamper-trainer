@@ -609,3 +609,8 @@ code.compare-value, .comparison-color-keys .compare-value { padding: 0.25rem; bo
 @media (forced-colors: active) {
   .compare-value.compare-second { border-style: dashed; }
 }
+
+.position-inline { margin-block: 1rem; }
+.position-disclosure-indicator { display: inline-block; width: 1.25em; }
+.position-inline-panel { margin-block-start: 1rem; padding-block-start: 0.75rem; border-block-start: 1px solid var(--border); }
+.position-inline-panel .position-case { margin-block: 0; }
