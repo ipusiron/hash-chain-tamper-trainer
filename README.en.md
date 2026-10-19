@@ -121,7 +121,7 @@ The following results use the 8-row access log with its header and trailer. Oper
 
 Without a trailer, removing the last 2 rows passes.
 
-For the last record, separate changing its contents from replacing its stored hash. Start from the original 8 records and change only record 8, leaving records 1–7 and the original trailer unchanged. A represents the hash from record 8's original input; B represents the hash from its changed input. A and B differ in this example.
+For the last record, separate changing its contents from replacing its stored hash. Start from the original 8 records and change only record 8, leaving records 1–7 and the original trailer unchanged. A represents the hash from record 8's original input; B represents the hash from its changed input. Assume A ≠ B.
 
 | Operation | Hash stored with record 8 | Hash recomputed during verification | Record 8 comparison |
 |---|---|---|---|
