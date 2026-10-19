@@ -187,8 +187,10 @@
       }
       summary.append(fields, heads);
       details.append(summary, node('p', t(verification ? 'clarity.verificationInput' : 'input')), node('code', input, 'hash-input'));
-      if (verification) details.append(node('p', t('expected')), node('code', verification.expected, 'hash verification-hash'));
-      details.append(node('p', t('fullHash')), node('code', row.hash, 'hash stored-hash'));
+      if (verification) details.append(node('p', t('expected')), comparisonTone(node('code', verification.expected, 'hash verification-hash'), verification.expected, row.hash, 'first'));
+      const stored = node('code', row.hash, 'hash stored-hash');
+      if (verification) comparisonTone(stored, row.hash, verification.expected, 'second');
+      details.append(node('p', t('fullHash')), stored);
       li.append(details);
       list.append(li);
     });
@@ -549,6 +551,7 @@
       code.title = hash;
       code.dataset.hash = hash;
       cell.dataset.side = key;
+      comparisonTone(code, hash, key === 'stored' ? rightHash : leftHash, pair.childElementCount === 0 ? 'first' : 'second');
       cell.append(node('span', label), code);
       pair.append(cell);
     }
@@ -639,6 +642,7 @@
         node('p', t('position.time', {before:base.rows[index].fields[0], after:chain.rows[index].fields[0]}), 'position-time'));
       const figure = visualFigure('position.internal');
       figure.classList.add('position-flow');
+      figure.append(comparisonLegend());
       figure.append(node('p', t(last ? 'position.unchangedLast' : 'position.unchangedMiddle'), 'position-unchanged'),
         positionRecord(result.rows[index], chain.rows[index].fields, true));
       if (!last) {
@@ -665,12 +669,14 @@
         node('p', t('position.snapshotNote.' + position.stage)));
       const details = disclosure('position-detail-' + index, 'position.details', visualChainComparison(result, 'free'));
       const trailerDetails = node('div', undefined, 'position-trailer-detail');
+      const oldInput = core.trailerInput(base.rows[7].hash, 8);
+      const newInput = core.trailerInput(all.rows[7].expected, 8);
       trailerDetails.append(node('p', t('position.originalTrailerInput')),
-        node('code', core.trailerInput(base.rows[7].hash, 8), 'hash-input'),
+        comparisonInput(oldInput, newInput, 'first'),
         node('p', t('position.currentTrailerInput')),
-        node('code', core.trailerInput(all.rows[7].expected, 8), 'hash-input'),
-        visualCard(t('position.originalTrailer'), visualHash(all.trailer.actual)),
-        visualCard(t('position.recomputedTrailer'), visualHash(all.trailer.expected)),
+        comparisonInput(newInput, oldInput, 'second'),
+        comparisonTone(visualCard(t('position.originalTrailer'), visualHash(all.trailer.actual)), all.trailer.actual, all.trailer.expected, 'first'),
+        comparisonTone(visualCard(t('position.recomputedTrailer'), visualHash(all.trailer.expected)), all.trailer.expected, all.trailer.actual, 'second'),
         node('p', t(position.hasTrailer ? 'position.trailerUsed' : 'position.trailerNotUsed')));
       details.append(visualCard(t('position.originalHash'), visualHash(base.rows[index].hash)), trailerDetails);
       block.append(figure, snapshot, details);
@@ -1150,6 +1156,38 @@
     return card;
   }
 
+  // Compare complete values, never coincidentally equal characters within different hashes.
+  function comparisonTone(element, value, other, side) {
+    const tone = value === other ? 'same' : side;
+    element.classList.add('compare-value', 'compare-' + tone);
+    element.dataset.compareValue = value;
+    element.dataset.compareOther = other;
+    element.dataset.compareTone = tone;
+    return element;
+  }
+
+  function comparisonLegend() {
+    const legend = node('div', undefined, 'comparison-legend');
+    const keys = node('div', undefined, 'comparison-color-keys');
+    for (const tone of ['same', 'first', 'second']) keys.append(node('span', t('compare.color.' + tone), 'compare-value compare-' + tone));
+    legend.append(keys, node('p', t('compare.color.note')));
+    return legend;
+  }
+
+  function comparisonInput(input, other, side) {
+    const code = node('code', undefined, 'hash-input comparison-input');
+    const split = input.indexOf('|');
+    const otherSplit = other.indexOf('|');
+    code.append(comparisonTone(node('span', input.slice(0, split)), input.slice(0, split), other.slice(0, otherSplit), side), '|');
+    const fields = input.slice(split + 1).split(',');
+    const peers = other.slice(otherSplit + 1).split(',');
+    fields.forEach((field, i) => {
+      if (i) code.append(',');
+      code.append(comparisonTone(node('span', field), field, peers[i], side));
+    });
+    return code;
+  }
+
   function visualHash(hash) {
     const code = node('code', undefined, 'visual-hash');
     for (let i = 0; i < hash.length; i += 8) {
@@ -1210,6 +1248,7 @@
       for (const [cell, label, hash] of [[stored, 'compare.stored', row.actual], [recalculated, 'compare.recalculated', row.expected]]) {
         const value = node('code', shortHash(hash), 'comparison-hash');
         value.title = hash;
+        comparisonTone(cell, hash, cell === stored ? row.expected : row.actual, cell === stored ? 'first' : 'second');
         cell.append(node('span', t(label), 'comparison-cell-label'), value);
       }
       const status = node('div', undefined, 'comparison-status');
@@ -1219,13 +1258,13 @@
       const full = node('details', undefined, 'comparison-full');
       full.append(node('summary', t('compare.full', {n:row.number})));
       const pair = node('div', undefined, 'visual-grid');
-      pair.append(visualCard(t('compare.stored'), visualHash(row.actual)),
-        visualCard(t('compare.recalculated'), visualHash(row.expected)));
+      pair.append(comparisonTone(visualCard(t('compare.stored'), visualHash(row.actual)), row.actual, row.expected, 'first'),
+        comparisonTone(visualCard(t('compare.recalculated'), visualHash(row.expected)), row.expected, row.actual, 'second'));
       full.append(node('p', t('clarity.verificationInput')), node('code', row.input, 'hash-input'), pair);
       li.append(stored, status, recalculated, full);
       list.append(li);
     }
-    block.append(headings, list, node('p', t('compare.display'), 'muted'));
+    block.append(comparisonLegend(), headings, list, node('p', t('compare.display'), 'muted'));
     return block;
   }
 
@@ -1263,33 +1302,43 @@
       card.dataset.path = name;
       const prefix = node('code', shortHash(previous), 'propagation-prefix'); prefix.title = previous;
       const output = node('code', shortHash(hash), 'propagation-output'); output.title = hash;
+      const first = name === 'original';
+      const side = first ? 'first' : 'second';
+      const otherPrevious = first ? guide.results[2].rows[1].expected : guide.base.rows[1].hash;
+      const otherHash = first ? guide.results[2].rows[2].expected : guide.base.rows[2].hash;
+      comparisonTone(prefix, previous, otherPrevious, side);
+      comparisonTone(output, hash, otherHash, side);
+      const fields = guide.base.rows[2].fields.join(',');
+      const record = comparisonTone(node('code', fields, 'propagation-fields'), fields, fields, side);
       card.append(node('h4', t('clarity.' + name)), node('p', t('clarity.prefix')), prefix,
-        node('p', t('clarity.sameRecord')), node('code', guide.base.rows[2].fields.join(','), 'propagation-fields'),
+        node('p', t('clarity.sameRecord')), record,
         node('p', t('clarity.output3')), output);
       const input = core.hashInput(previous, guide.base.rows[2].fields);
       const full = node('details');
-      full.append(node('summary', t('visual.exact')), node('code', input, 'hash-input'));
+      full.append(node('summary', t('visual.exact')), comparisonInput(input, core.hashInput(otherPrevious, guide.base.rows[2].fields), side));
       card.append(full); grid.append(card);
     }
-    figure.append(grid, node('p', t('clarity.propagationNote'), 'visual-conclusion'));
+    figure.append(comparisonLegend(), grid, node('p', t('clarity.propagationNote'), 'visual-conclusion'));
     return figure;
   }
 
   function trailerComparison() {
     const pair = node('div', undefined, 'visual-grid trailer-comparison');
     const result = guide.results[5][1];
-    for (const [key, input, hash] of [
+    const variants = [
       ['clarity.trailerOriginal', core.trailerInput(core.tip(guide.base), guide.base.rows.length), result.trailer.actual],
       ['clarity.trailerCut', core.trailerInput(result.rows[result.rows.length - 1].expected, result.rows.length), result.trailer.expected]
-    ]) {
+    ];
+    for (const [i, [key, input, hash]] of variants.entries()) {
       const card = node('div', undefined, 'visual-card');
-      const value = node('code', undefined, 'hash-input');
-      const split = input.lastIndexOf('|');
-      value.append(input.slice(0, split), node('wbr'), node('strong', input.slice(split), 'observation-token'));
+      const side = i === 0 ? 'first' : 'second';
+      const peer = variants[1 - i];
+      const value = comparisonInput(input, peer[1], side);
       card.append(node('h4', t(key)), node('p', t('clarity.trailerInput')), value,
-        node('p', t('clarity.trailerHash')), visualHash(hash));
+        node('p', t('clarity.trailerHash')), comparisonTone(visualHash(hash), hash, peer[2], side));
       pair.append(card);
     }
+    pair.prepend(comparisonLegend());
     return pair;
   }
 
@@ -1334,8 +1383,11 @@
       const before = samples[0].rows[1];
       const after = guide.modified ? guide.modified.rows[1].fields : before.map((value, i) => i ? value : '09:06');
       const pair = node('div', undefined, 'visual-grid');
-      pair.append(visualCard(t('visual.recordBefore'), core.hashInput(guide.firstHash, before)),
-        visualCard(t('visual.recordAfter'), core.hashInput(guide.firstHash, after), t('visual.changeTime')));
+      const beforeInput = core.hashInput(guide.firstHash, before);
+      const afterInput = core.hashInput(guide.firstHash, after);
+      pair.append(visualCard(t('visual.recordBefore'), comparisonInput(beforeInput, afterInput, 'first')),
+        visualCard(t('visual.recordAfter'), comparisonInput(afterInput, beforeInput, 'second'), t('visual.changeTime')));
+      pair.prepend(comparisonLegend());
       figure.append(disclosure('guide-input-pair-' + step, 'clarity.inputs', pair));
       const result = guide.results[step];
       if (!result) {
@@ -1585,12 +1637,11 @@
         const after = guide.results[2].rows[1].expected;
         for (const [label,hash] of [[t('guide.before'),before],[t('guide.after'),after]]) {
           const block = node('div');
-          const code = node('code',undefined,'avalanche');
-          Array.from(hash).forEach((digit,i) => code.append(node('span',digit,before[i] !== after[i] ? 'changed-digit' : '')));
+          const code = comparisonTone(visualHash(hash), hash, hash === before ? after : before, comparison.childElementCount === 0 ? 'first' : 'second');
           block.append(node('p',label), code);
           comparison.append(block);
         }
-        output.append(comparison,node('p', t('guide.changedDigits', {n:Array.from(before).filter((digit,i) => digit !== after[i]).length})));
+        output.append(comparisonLegend(),comparison,node('p', t('guide.changedDigits', {n:Array.from(before).filter((digit,i) => digit !== after[i]).length})));
       }
       const rows = node('div');
       renderChain(rows, step === 2 ? guide.modified : guide.single, guide.results[step]);
