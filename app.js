@@ -4,7 +4,8 @@
   const samples = window.HashChainSamples;
   const messages = window.HashChainMessages;
   const $ = id => document.getElementById(id);
-  const tabs = ['guide', 'free', 'learn', 'settings'];
+  const tabs = ['guide', 'position', 'free', 'learn', 'settings'];
+  const position = { stage: 0, hasTrailer: true, cases: [] };
   const learningModel = window.HashChainLearning;
   const learning = learningModel.create();
   let learningNotice = '';
@@ -333,6 +334,7 @@
     }
     renderLearning();
     renderGuide();
+    renderPosition();
     if (state.error) $('error').textContent = t('error.' + state.error);
   }
 
@@ -526,8 +528,139 @@
       stages.append(card);
     }
     figure.append(stages, node('p', t('record8.meaning')), node('p', t('record8.trailer')));
+    const compare = node('button', t('position.open'));
+    compare.type = 'button';
+    compare.addEventListener('click', () => showTab('position', true));
+    figure.append(compare);
     return figure;
   }
+
+  async function preparePosition() {
+    const base = await core.createChain(samples[0]);
+    const cases = [];
+    for (const [index, value] of [[1, '09:06'], [7, '09:51']]) {
+      const stages = [base];
+      stages.push(await core.tamper(base, 'rewrite', {index, column: 0, value}));
+      stages.push(await core.tamper(base, 'rehashOne', {index, column: 0, value}));
+      const results = [];
+      for (const chain of stages) results.push({
+        withTrailer: await core.verify(chain),
+        withoutTrailer: await core.verify({...chain, hasTrailer: false, trailer: null})
+      });
+      cases.push({index, base, stages, results});
+    }
+    position.cases = cases;
+  }
+
+  function positionPair(leftLabel, leftHash, rightLabel, rightHash, valid) {
+    const pair = node('div', undefined, 'position-pair');
+    for (const [key, label, hash] of [['stored', leftLabel, leftHash], ['recomputed', rightLabel, rightHash]]) {
+      const cell = node('div', undefined, 'position-value');
+      const code = node('code', shortHash(hash));
+      code.title = hash;
+      code.dataset.hash = hash;
+      cell.dataset.side = key;
+      cell.append(node('span', label), code);
+      pair.append(cell);
+    }
+    const verdict = node('strong', t('visual.status.' + (valid ? 'pass' : 'fail')), 'position-verdict ' + (valid ? 'good' : 'bad'));
+    verdict.dataset.valid = String(valid);
+    pair.append(verdict);
+    return pair;
+  }
+
+  function positionRecord(row, fields, target) {
+    const card = node('div', undefined, 'position-record' + (target ? ' position-target' : ''));
+    card.dataset.record = String(row.number);
+    card.append(node('h4', t(target ? 'position.target' : 'position.next', {n:row.number})),
+      node('code', fields.join(','), 'position-fields'));
+    if (!target) card.append(node('p', t('position.nextUnchanged'), 'muted'));
+    const prefix = node('p', undefined, 'position-prefix');
+    const hash = node('code', shortHash(row.input.slice(0, 64)));
+    hash.title = row.input.slice(0, 64);
+    hash.dataset.hash = row.input.slice(0, 64);
+    prefix.append(t('position.inputPrefix'), hash);
+    card.append(prefix, positionPair(t('position.stored'), row.actual, t('position.recomputed'), row.expected, row.valid));
+    return card;
+  }
+
+  function positionArrow(text) {
+    const connector = node('div', undefined, 'position-connector');
+    const arrow = node('span', undefined, 'position-arrow');
+    arrow.setAttribute('aria-hidden', 'true');
+    connector.append(arrow, node('span', text));
+    return connector;
+  }
+
+  function renderPosition() {
+    for (let i = 0; i < 3; i += 1) $('position-stage-' + i).setAttribute('aria-pressed', String(i === position.stage));
+    $('position-trailer').checked = position.hasTrailer;
+    $('position-status').textContent = t('position.state.' + position.stage);
+    $('position-conclusion').textContent = t('position.conclusion.' + position.stage + (position.hasTrailer ? '.with' : '.without'));
+    const container = $('position-cases');
+    container.replaceChildren();
+    for (const item of position.cases) {
+      const {index, base} = item;
+      const chain = item.stages[position.stage];
+      const result = item.results[position.stage][position.hasTrailer ? 'withTrailer' : 'withoutTrailer'];
+      const all = item.results[position.stage].withTrailer;
+      const last = index === base.rows.length - 1;
+      const block = node('section', undefined, 'position-case');
+      block.dataset.case = last ? 'last' : 'middle';
+      block.append(node('h3', t(last ? 'position.last' : 'position.middle')),
+        node('p', t('position.time', {before:base.rows[index].fields[0], after:chain.rows[index].fields[0]}), 'position-time'));
+      const figure = visualFigure('position.internal');
+      figure.classList.add('position-flow');
+      figure.append(node('p', t(last ? 'position.unchangedLast' : 'position.unchangedMiddle'), 'position-unchanged'),
+        positionRecord(result.rows[index], chain.rows[index].fields, true));
+      if (!last) {
+        figure.append(positionArrow(t('position.forward')), positionRecord(result.rows[index + 1], chain.rows[index + 1].fields, false),
+          node('p', t('position.remaining', {count:result.rows.slice(index + 2).filter(row => !row.valid).length}), 'position-remaining'));
+      } else figure.append(node('p', t('position.noNext'), 'position-no-next'));
+      figure.append(positionArrow(t(last ? 'position.toTrailer' : 'position.afterRemaining')));
+      const trailer = node('div', undefined, 'position-trailer');
+      trailer.append(node('h4', t('position.trailer')));
+      if (position.hasTrailer) {
+        trailer.append(positionPair(t('position.originalTrailer'), all.trailer.actual,
+          t('position.recomputedTrailer'), all.trailer.expected, all.trailer.valid));
+      } else trailer.append(node('p', t('position.noTrailer')));
+      const overall = node('p', t(result.valid ? 'position.pass' : 'position.fail'), 'position-overall ' + (result.valid ? 'good' : 'bad'));
+      overall.dataset.valid = String(result.valid);
+      figure.append(trailer, overall);
+      const snapshot = node('section', undefined, 'position-snapshot');
+      snapshot.append(node('h4', t('position.snapshot')),
+        node('p', t(position.stage === 0 ? 'position.recordSame' : 'position.recordDifferent', {n:index + 1})),
+        positionPair(t('position.originalHash'), base.rows[index].hash, t('position.currentHash'), chain.rows[index].hash,
+          base.rows[index].hash === chain.rows[index].hash),
+        node('p', t('position.snapshotNote.' + position.stage)));
+      const details = disclosure('position-detail-' + index, 'position.details', visualChainComparison(result, 'free'));
+      const trailerDetails = node('div', undefined, 'position-trailer-detail');
+      trailerDetails.append(node('p', t('position.originalTrailerInput')),
+        node('code', core.trailerInput(base.rows[7].hash, 8), 'hash-input'),
+        node('p', t('position.currentTrailerInput')),
+        node('code', core.trailerInput(all.rows[7].expected, 8), 'hash-input'),
+        visualCard(t('position.originalTrailer'), visualHash(all.trailer.actual)),
+        visualCard(t('position.recomputedTrailer'), visualHash(all.trailer.expected)),
+        node('p', t(position.hasTrailer ? 'position.trailerUsed' : 'position.trailerNotUsed')));
+      details.append(visualCard(t('position.originalHash'), visualHash(base.rows[index].hash)), trailerDetails);
+      block.append(figure, snapshot, details);
+      container.append(block);
+    }
+  }
+
+  for (let i = 0; i < 3; i += 1) $('position-stage-' + i).addEventListener('click', () => {
+    position.stage = i;
+    renderPosition();
+  });
+  $('position-trailer').addEventListener('change', event => {
+    position.hasTrailer = event.target.checked;
+    renderPosition();
+  });
+  $('position-reset').addEventListener('click', () => {
+    position.stage = 0;
+    position.hasTrailer = true;
+    renderPosition();
+  });
 
   function lessonBody(lesson, content) {
     const prefix = 'lesson.' + (lesson + 1);
@@ -1577,6 +1710,7 @@
     document.body.setAttribute('aria-busy', 'false');
   } else perform(async () => {
     await rebuild();
+    await preparePosition();
     guide.partial = await core.createChain({headers:samples[0].headers, rows:[]}, {hasTrailer:false});
     guide.firstHash = await core.sha256(core.hashInput(guide.partial.seed, samples[0].rows[0]));
   });
