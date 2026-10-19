@@ -169,6 +169,18 @@ select, input {
   max-width: 100%;
   padding: 0.4rem;
 }
+/* Keep the native mark compact; its associated label supplies the touch target. */
+input[type="checkbox"], input[type="radio"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 0;
+  min-height: 0;
+  flex: 0 0 1.125rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
 button {
   max-width: 100%;
 }
@@ -347,9 +359,7 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .avalanche { display: block; overflow-wrap: anywhere; background: var(--surface); padding: 0.75rem; }
 .changed-digit { color: var(--warn-fg); background: var(--warn-bg); text-decoration: underline; text-decoration-thickness: 2px; font-weight: 700; }
 .check-options { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-block: 1rem; }
-.check-option { display: flex; gap: 0.5rem; align-items: center; min-height: 44px; padding-inline: 0.5rem; border: 1px solid var(--border); border-radius: 4px; }
-.check-option input { width: 44px; height: 44px; margin: 0; accent-color: var(--accent); flex: 0 0 44px; }
-.check-option label { padding-block: 0.5rem; cursor: pointer; }
+.check-option { display: flex; gap: 0.5rem; align-items: center; min-width: 44px; min-height: 44px; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
 @media (min-width: 760px) {
   .guide-steps { grid-template-columns: repeat(7,minmax(0,1fr)); }
   .step-picker > summary { display: none; }
@@ -380,8 +390,8 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .learning-section { padding: 0.75rem 1rem; border: 1px solid var(--border); border-inline-start: 4px solid var(--border); border-radius: 6px; }
 .section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; margin-block-end: 0.5rem; }
 .section-heading h3, .section-heading h4 { margin: 0; flex: 1 1 14rem; min-width: 0; }
-.section-check { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; min-height: 44px; font-size: 0.875rem; }
-.section-check input { width: 44px; height: 44px; flex: 0 0 44px; margin: 0; accent-color: var(--ok-fg); }
+.section-check { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; min-width: 44px; min-height: 44px; padding: 0.4rem 0.5rem; font-size: 0.875rem; }
+.section-check input { accent-color: var(--ok-fg); }
 .learning-section.is-understood { background: var(--ok-bg); border-color: var(--ok-fg); }
 .is-understood .section-check { color: var(--ok-fg); }
 @media (hover: hover) {
@@ -535,7 +545,6 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .evidence-check { padding-block: 0.5rem; border-block-start: 1px solid var(--border); }
 .evidence-check h4 { margin-block: 0.5rem; }
 .prediction-choice { display: inline-flex; margin-inline-end: 0.5rem; }
-.prediction-choice input { width: 44px; height: 44px; }
 fieldset { min-width: 0; border: 1px solid var(--border); }
 legend { max-width: 100%; }
 .quiz-level { font-weight: 700; color: var(--accent); }
@@ -566,3 +575,18 @@ legend { max-width: 100%; }
 
 .position-record .position-value code, .position-trailer .position-value code { font-size: 0.875rem; white-space: nowrap; }
 .position-record .position-value span, .position-trailer .position-value span { white-space: pre-line; }
+
+/* Introduce the record, calculation input and output before the first action. */
+.data-flow { display: grid; grid-template-columns: minmax(0, 1fr); margin-block: 1rem; }
+.data-flow > .visual-card { min-width: 0; }
+.data-flow .position-connector { justify-content: center; }
+.data-flow .position-arrow { flex: 0 0 24px; }
+.data-note { border-inline-start: 3px solid var(--accent); padding-inline-start: 0.75rem; }
+.data-kept-pair, .data-verification { margin-block-start: 1.25rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; }
+.data-kept-pair { background: var(--surface); }
+.data-kept-pair > strong, .data-verification > strong { display: block; font-size: 1rem; }
+@media (min-width: 900px) {
+  .data-flow { grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1.25fr) 5rem minmax(0, 1fr); align-items: stretch; }
+  .data-flow .position-connector { flex-direction: column; text-align: center; gap: 0.25rem; padding-inline: 0.2rem; }
+  .data-flow .position-arrow { transform: rotate(-90deg); flex-basis: auto; }
+}
