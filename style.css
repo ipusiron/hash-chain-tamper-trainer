@@ -293,18 +293,15 @@ blockquote {
 .position-record { position: relative; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
 .position-target { border-inline-start: 5px solid var(--accent); }
 .position-record h6, .position-trailer h6, .position-snapshot h6 { font-size: 1rem; margin-block: 0 0.5rem; }
-.position-fields { display: block; padding: 0.4rem; border-block: 1px solid var(--border); font-size: 0.875rem; }
+.position-fields { display: block; font-size: 0.875rem; }
 .position-prefix { font-size: 0.875rem; margin-block: 0.5rem; }
-.position-prefix code { display: inline-block; }
+.position-prefix code, .position-prefix span { display: block; }
 .position-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
 .position-value { min-width: 0; font-size: 0.875rem; }
 .position-value span, .position-value code { display: block; }
 .position-value code { font-size: 1rem; font-weight: 700; }
 .position-verdict { grid-column: 1 / -1; padding: 0.25rem 0.5rem; text-align: center; border: 1px solid currentColor; border-radius: 4px; }
 .position-connector { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.5rem; font-size: 0.875rem; }
-.position-arrow { flex: 0 0 1.25rem; position: relative; width: 1.25rem; height: 2.25rem; color: var(--accent); }
-.position-arrow::before { content: ""; position: absolute; width: 3px; height: 1.5rem; inset-inline-start: calc(50% - 1.5px); background: currentColor; }
-.position-arrow::after { content: ""; position: absolute; top: 1.5rem; width: 1.25rem; height: 0.75rem; background: currentColor; clip-path: polygon(0 0, 100% 0, 50% 100%); }
 .position-remaining, .position-no-next { margin-block: 0.75rem 0; padding: 0.5rem; border: 1px dashed var(--border); background: var(--surface); }
 .position-no-next { font-weight: 700; }
 .position-trailer { padding: 0.75rem; border: 2px solid var(--border); border-radius: 0.5rem; background: var(--surface); }
@@ -547,9 +544,25 @@ legend { max-width: 100%; }
 
 .lesson-visual .lesson-visual { margin-inline: 0; padding: 0; border: 0; background: transparent; }
 
-.chain-illustration { margin: 1rem 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-.chain-illustration img { display: block; width: 100%; height: auto; background: #fff; }
-.chain-illustration figcaption { padding: 0.75rem; background: var(--bg); }
-.chain-illustration figcaption p { margin-block: 0.5rem 0; }
 .position-handoff { margin-block: 1rem; padding: 1rem; border-inline-start: 4px solid var(--accent); background: var(--bg); }
 #guide-position-heading { margin-block: 1.5rem 0.75rem; font-size: 1.25rem; }
+
+.diagram-reading { padding: 0.75rem; border-inline-start: 4px solid var(--accent); background: var(--bg); }
+.position-arrow { display: block; flex: 0 0 1.5rem; width: 1.5rem; height: 3rem; color: var(--accent); }
+.diagram-input { padding: 0.75rem; border: 2px solid var(--accent); border-radius: 3px; background: var(--surface); }
+.diagram-input > strong { display: block; margin-block-end: 0.5rem; }
+.diagram-input .position-prefix { margin: 0; }
+.diagram-separator { display: block; margin-block: 0.25rem; color: var(--accent); font-weight: 700; }
+.diagram-record { font-size: 0.875rem; }
+.diagram-record span, .diagram-record code { display: block; }
+.diagram-function { padding: 0.5rem 0.75rem; border: 2px solid var(--fg); background: var(--bg); font: 700 1.125rem ui-monospace, monospace; text-align: center; }
+.position-record .position-value, .position-trailer .position-value { padding: 0.375rem; border: 1px solid var(--border); background: var(--surface); }
+.position-record [data-side="recomputed"], .position-trailer [data-side="recomputed"] { border: 2px solid var(--accent); }
+.position-record .position-value code, .position-trailer .position-value code { margin-block-start: 0.5rem; }
+.diagram-exact { margin-block: 0.75rem 0; }
+.diagram-exact .hash-input { margin-block: 0.75rem; }
+.diagram-callout { position: relative; margin-block: 1rem 0; padding: 0.75rem; border: 1px solid var(--accent); border-radius: 6px; background: var(--surface); font-size: 0.875rem; }
+.diagram-callout::before { content: ''; position: absolute; inset-block-start: -6px; inset-inline-end: 1.5rem; width: 10px; height: 10px; border-block-start: 1px solid var(--accent); border-inline-start: 1px solid var(--accent); background: var(--surface); transform: rotate(45deg); }
+
+.position-record .position-value code, .position-trailer .position-value code { font-size: 0.875rem; white-space: nowrap; }
+.position-record .position-value span, .position-trailer .position-value span { white-space: pre-line; }

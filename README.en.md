@@ -38,7 +38,7 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Comparing middle and last records](assets/en/position.png)
 
-*The chain illustration is embedded in Step 3. Compare records 2 and 8 using the same actions and verification rule.*
+*Step 3 connects input, UTF-8 encoding, SHA-256 and output, then compares the output with the stored hash.*
 
 ## ✨ Features
 
@@ -59,7 +59,7 @@ The Learning path opens first. Read the aim and prerequisites, then use the main
 
 1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
 2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. Compare the original chain’s hashes with hashes recalculated from the changed records, record by record. Expand any record to compare all 64 characters.
-3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same. Then use the chain illustration and real values to compare the same action on the last record, 8.
+3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same. Then use the input/output diagram and real values to compare the same action on the last record, 8.
 4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records and expand the step-3 comparison. A note beside the result distinguishes internal consistency from being unchanged since the original log.
 5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails. Compare the eight-record and six-record inputs and trailers, then also rebuild the trailer for six records.
 6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview. Select any verdict to inspect available keys and detection evidence.
@@ -81,7 +81,7 @@ A side-by-side example connects the short display to all 64 characters, with the
 
 Diagrams show the status of all 8 rows, tail deletion, and the people who hold keys or independent copies. All four advanced sections have worked examples, and explanatory prose is divided into paragraphs by topic.
 
-Step 3 embeds the chain illustration and Middle vs last comparison in What just happened. The upper scene edits record 2; the lower scene edits record 8. END represents the trailer. Two original copies let you replay 0 original, 1 change only the contents, and 2 also update that record’s stored hash. It opens at stage 2, matching the Step 3 action; stage 1 revisits Step 2.
+Step 3 embeds the Middle vs last input/output diagrams in What just happened. Arrows connect each input string, UTF-8 encoding, SHA-256 and output. The output and stored hash appear side by side, with callouts explaining each match or mismatch. Arrows also show the output feeding the next record or trailer input. Expand the full input and every byte in place. Two original copies let you replay 0 original, 1 change only the contents, and 2 also update that record’s stored hash. It opens at stage 2, matching the Step 3 action; stage 1 revisits Step 2.
 
 Toggle whether the original trailer is included. At stage 2, both target records match, but record 3 mismatches in the middle case and the original trailer mismatches in the last-record case. Excluding the trailer lets the last-record case pass without making it identical to the original. A separate comparison below each diagram shows changes from the original; expand all eight inputs and full hashes for details.
 
@@ -248,7 +248,6 @@ hash-chain-tamper-trainer/          # Project root
 ├── README.md                       # Japanese documentation
 ├── app.js                          # Interface and interactions
 ├── assets/                         # Screenshots and illustration
-│   ├── chain-positions.webp        # Illustrated middle and last record chains
 │   ├── access-entry.webp           # Card access illustration
 │   ├── chain.png                   # Chain view
 │   ├── en/                         # English screenshots
