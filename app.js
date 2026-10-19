@@ -4,8 +4,8 @@
   const samples = window.HashChainSamples;
   const messages = window.HashChainMessages;
   const $ = id => document.getElementById(id);
-  const tabs = ['guide', 'position', 'free', 'learn', 'settings'];
-  const position = { stage: 0, hasTrailer: true, cases: [] };
+  const tabs = ['guide', 'free', 'learn', 'settings'];
+  const position = { stage: 2, hasTrailer: true, cases: [] };
   const learningModel = window.HashChainLearning;
   const learning = learningModel.create();
   let learningNotice = '';
@@ -334,7 +334,6 @@
     }
     renderLearning();
     renderGuide();
-    renderPosition();
     if (state.error) $('error').textContent = t('error.' + state.error);
   }
 
@@ -512,27 +511,15 @@
     return prerequisite;
   }
 
-  function lastRecordExample() {
-    const figure = visualFigure('record8.title');
-    figure.classList.add('last-record-example');
-    figure.append(node('p', t('record8.context')), node('p', t('record8.legend')));
-    const stages = node('div', undefined, 'visual-grid');
-    for (const stage of ['before', 'after']) {
-      const card = visualCard(t('record8.' + stage + '.title'));
-      card.dataset.stage = stage;
-      card.append(node('p', t('record8.stored', {hash: stage === 'before' ? 'A' : 'B'})),
-        node('p', t('record8.recomputed')));
-      const result = node('p');
-      result.append(node('strong', t('record8.' + stage + '.result')));
-      card.append(result);
-      stages.append(card);
-    }
-    figure.append(stages, node('p', t('record8.meaning')), node('p', t('record8.trailer')));
+  function positionGuideLink() {
     const compare = node('button', t('position.open'));
     compare.type = 'button';
-    compare.addEventListener('click', () => showTab('position', true));
-    figure.append(compare);
-    return figure;
+    compare.addEventListener('click', () => {
+      chooseGuide(3, true);
+      if (guide.results[3]) $('guide-position-heading').focus();
+      else $('guide-action').focus();
+    });
+    return compare;
   }
 
   async function preparePosition() {
@@ -572,7 +559,7 @@
   function positionRecord(row, fields, target) {
     const card = node('div', undefined, 'position-record' + (target ? ' position-target' : ''));
     card.dataset.record = String(row.number);
-    card.append(node('h4', t(target ? 'position.target' : 'position.next', {n:row.number})),
+    card.append(node('h6', t(target ? 'position.target' : 'position.next', {n:row.number})),
       node('code', fields.join(','), 'position-fields'));
     if (!target) card.append(node('p', t('position.nextUnchanged'), 'muted'));
     const prefix = node('p', undefined, 'position-prefix');
@@ -593,6 +580,8 @@
   }
 
   function renderPosition() {
+    $('guide-position').hidden = guide.step !== 3 || !guide.results[3];
+    $('position-illustration').alt = t('position.imageAlt');
     for (let i = 0; i < 3; i += 1) $('position-stage-' + i).setAttribute('aria-pressed', String(i === position.stage));
     $('position-trailer').checked = position.hasTrailer;
     $('position-status').textContent = t('position.state.' + position.stage);
@@ -607,7 +596,7 @@
       const last = index === base.rows.length - 1;
       const block = node('section', undefined, 'position-case');
       block.dataset.case = last ? 'last' : 'middle';
-      block.append(node('h3', t(last ? 'position.last' : 'position.middle')),
+      block.append(node('h5', t(last ? 'position.last' : 'position.middle')),
         node('p', t('position.time', {before:base.rows[index].fields[0], after:chain.rows[index].fields[0]}), 'position-time'));
       const figure = visualFigure('position.internal');
       figure.classList.add('position-flow');
@@ -619,7 +608,7 @@
       } else figure.append(node('p', t('position.noNext'), 'position-no-next'));
       figure.append(positionArrow(t(last ? 'position.toTrailer' : 'position.afterRemaining')));
       const trailer = node('div', undefined, 'position-trailer');
-      trailer.append(node('h4', t('position.trailer')));
+      trailer.append(node('h6', t('position.trailer')));
       if (position.hasTrailer) {
         trailer.append(positionPair(t('position.originalTrailer'), all.trailer.actual,
           t('position.recomputedTrailer'), all.trailer.expected, all.trailer.valid));
@@ -628,7 +617,7 @@
       overall.dataset.valid = String(result.valid);
       figure.append(trailer, overall);
       const snapshot = node('section', undefined, 'position-snapshot');
-      snapshot.append(node('h4', t('position.snapshot')),
+      snapshot.append(node('h6', t('position.snapshot')),
         node('p', t(position.stage === 0 ? 'position.recordSame' : 'position.recordDifferent', {n:index + 1})),
         positionPair(t('position.originalHash'), base.rows[index].hash, t('position.currentHash'), chain.rows[index].hash,
           base.rows[index].hash === chain.rows[index].hash),
@@ -656,8 +645,9 @@
     position.hasTrailer = event.target.checked;
     renderPosition();
   });
+  $('position-next').addEventListener('click', () => chooseGuide(4, true));
   $('position-reset').addEventListener('click', () => {
-    position.stage = 0;
+    position.stage = 2;
     position.hasTrailer = true;
     renderPosition();
   });
@@ -693,7 +683,7 @@
     }
     table.append(thead, tbody);
     content.append(table);
-    if (lesson === 2) content.append(lastRecordExample());
+    if (lesson === 2) content.append(positionGuideLink());
     const links = node('ul');
     lessonReferences[lesson].forEach(index => {
       const li = node('li');
@@ -838,7 +828,11 @@
       delete guide.results[4];
       await guideModified();
     }
-    if (step === 3) await guideSingle();
+    if (step === 3) {
+      await guideSingle();
+      position.stage = 2;
+      position.hasTrailer = true;
+    }
     if (step === 4) {
       guide.rebuilt = await core.rechain(await guideSingle());
       guide.results[4] = await core.verify(guide.rebuilt);
@@ -1377,7 +1371,9 @@
       messages[language][key].split('\n').map(template => observationParagraph(template, values))));
     $('guide-meaning').replaceChildren();
     if (step >= 2 && step <= 4 && guide.results[step]) $('guide-meaning').append(resultMeaning(guide.results[step]));
-    $('guide-visual').replaceChildren(guideVisual());
+    const detail = guideVisual();
+    $('guide-visual').replaceChildren(step === 3 && guide.results[3]
+      ? disclosure('guide-record2-detail', 'position.record2Detail', detail) : detail);
     const explanation = $('guide-explanation');
     explanation.replaceChildren();
     for (const lesson of guideSources[step - 1]) {
@@ -1466,6 +1462,7 @@
 
   function renderGuide() {
     const step = guide.step;
+    renderPosition();
     $('guide-heading').textContent = t('guide.' + step + '.title');
     renderGuideExplanation();
     $('guide-task').textContent = t('guide.' + step + '.task');

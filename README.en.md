@@ -38,14 +38,13 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Comparing middle and last records](assets/en/position.png)
 
-*After updating the contents and the target’s stored hash, compare record 2 and record 8 using the same verification rule.*
+*The chain illustration is embedded in Step 3. Compare records 2 and 8 using the same actions and verification rule.*
 
 ## ✨ Features
 
 | Entrance | Content |
 |---|---|
-| Learning path | Seven steps with an aim, open prerequisites, an action, What just happened, How it works and What you learned; from a one-character change to protections and questions |
-| Middle vs last | Apply identical actions to records 2 and 8. Diagrams distinguish current-chain verification from comparison with the original |
+| Learning path | Seven steps with an aim, open prerequisites, an action, What just happened, How it works and What you learned; from a one-character change through middle/last comparison to protections and questions |
 | Free experiment | Two samples, row additions, seven modifications, all 16 protection combinations and computation details |
 | Learn | Four advanced and reference sections: Lamport chains; Git, Merkle trees and blockchains; the Day041 case study; references |
 | Settings | Save preferences and clear all understanding checks |
@@ -60,7 +59,7 @@ The Learning path opens first. Read the aim and prerequisites, then use the main
 
 1. Build a chain: calculate the hash for each of records 1–8. Inspect the stored pairs in the overview and distinguish the input string, UTF-8 bytes and output in the calculation diagram. Finish with the trailer and an example of the tip to keep as a checkpoint. Restart from record 1 at any time.
 2. Change one character: change the time in record 2 from 09:05 to 09:06 and verify while retaining the stored hashes. Compare the original chain’s hashes with hashes recalculated from the changed records, record by record. Expand any record to compare all 64 characters.
-3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same.
+3. Update only the hash for the changed record: calculate from the input containing the changed record 2 and replace its stored hash. The first mismatch moves to record 3. A propagation diagram shows how its input prefix changes while its four record fields stay the same. Then use the chain illustration and real values to compare the same action on the last record, 8.
 4. Rebuild all later hashes: replace all hashes and the trailer. See verification pass with the changed records and expand the step-3 comparison. A note beside the result distinguishes internal consistency from being unchanged since the original log.
 5. Cut off the tail: remove original records 7 and 8. The six remaining hashes match, but comparison with the original trailer fails. Compare the eight-record and six-record inputs and trailers, then also rebuild the trailer for six records.
 6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview. Select any verdict to inspect available keys and detection evidence.
@@ -82,7 +81,11 @@ A side-by-side example connects the short display to all 64 characters, with the
 
 Diagrams show the status of all 8 rows, tail deletion, and the people who hold keys or independent copies. All four advanced sections have worked examples, and explanatory prose is divided into paragraphs by topic.
 
-Middle vs last applies three stages to two original copies: 0 original, 1 change only the contents, and 2 also update that record’s stored hash. The diagram follows the recomputed hash into the next record or the trailer. Toggle whether the original trailer is included. At stage 2, both target records match, but record 3 mismatches in the middle case and the original trailer mismatches in the last-record case. Excluding the trailer lets the last-record case pass without making it identical to the original. A separate comparison below each diagram shows changes from the original; expand all eight inputs and full hashes for details. Reset affects only this tab’s stage and trailer setting.
+Step 3 embeds the chain illustration and Middle vs last comparison in What just happened. The upper scene edits record 2; the lower scene edits record 8. END represents the trailer. Two original copies let you replay 0 original, 1 change only the contents, and 2 also update that record’s stored hash. It opens at stage 2, matching the Step 3 action; stage 1 revisits Step 2.
+
+Toggle whether the original trailer is included. At stage 2, both target records match, but record 3 mismatches in the middle case and the original trailer mismatches in the last-record case. Excluding the trailer lets the last-record case pass without making it identical to the original. A separate comparison below each diagram shows changes from the original; expand all eight inputs and full hashes for details.
+
+Return to this step’s comparison restores stage 2 with the original trailer included. These controls do not change the record-2 experiment carried into Step 4. Continue to Step 4 to update the stored hashes for records 3–8 and the trailer as well.
 
 ## 🔬 Chain format and verification results
 
@@ -234,45 +237,46 @@ Tests cover cryptographic known answers, sample vectors independently generated 
 ## 📁 Directory structure
 
 ```text
-hash-chain-tamper-trainer/        # Project root
-├── .github/                      # GitHub configuration
-│   └── workflows/                # Automated checks
-│       └── test.yml              # Syntax and tests
-├── .gitignore                    # Git exclusions
-├── CLAUDE.md                     # Developer guide
-├── LICENSE                       # MIT license
-├── README.en.md                  # English documentation
-├── README.md                     # Japanese documentation
-├── app.js                        # Interface and interactions
-├── assets/                       # Screenshots and illustration
-│   ├── access-entry.webp         # Card access illustration
-│   ├── chain.png                 # Chain view
-│   ├── en/                       # English screenshots
-│   │   ├── chain.png             # Chain view
-│   │   ├── position.png          # Middle versus last comparison
-│   │   ├── protections.png       # Protection and role table
-│   │   └── settings.png          # Understanding check settings
-│   ├── position.png              # Middle versus last comparison
-│   ├── protections.png           # Protection and role table
-│   ├── settings.png              # Understanding check settings
-│   └── tamper.png                # Tampering result
-├── chain-core.js                 # Chain and cryptography
-├── index.html                    # Five entrances and seven guided steps
-├── learning-progress.js          # Understanding checks and persistence
-├── messages.js                   # Japanese and English text
-├── package.json                  # Test command
-├── samples.js                    # Two fictional samples
-├── style.css                     # Layout and light/dark colors
-└── test/                         # Automated tests
-    ├── chain-vectors.json        # Independent chain vectors
-    ├── chain.test.js             # Chain and tampering checks
-    ├── contrast.test.js          # Contrast checks
-    ├── html.test.js              # HTML and CSP checks
-    ├── i18n.test.js              # Dictionary and wording checks
-    ├── learning-progress.test.js # Understanding and storage checks
-    ├── learning.test.js          # Lesson and quiz checks
-    ├── protections.test.js       # Protection and role checks
-    └── readme.test.js            # Documentation consistency
+hash-chain-tamper-trainer/          # Project root
+├── .github/                        # GitHub configuration
+│   └── workflows/                  # Automated checks
+│       └── test.yml                # Syntax and tests
+├── .gitignore                      # Git exclusions
+├── CLAUDE.md                       # Developer guide
+├── LICENSE                         # MIT license
+├── README.en.md                    # English documentation
+├── README.md                       # Japanese documentation
+├── app.js                          # Interface and interactions
+├── assets/                         # Screenshots and illustration
+│   ├── chain-positions.webp        # Illustrated middle and last record chains
+│   ├── access-entry.webp           # Card access illustration
+│   ├── chain.png                   # Chain view
+│   ├── en/                         # English screenshots
+│   │   ├── chain.png               # Chain view
+│   │   ├── position.png            # Middle versus last comparison
+│   │   ├── protections.png         # Protection and role table
+│   │   └── settings.png            # Understanding check settings
+│   ├── position.png                # Middle versus last comparison
+│   ├── protections.png             # Protection and role table
+│   ├── settings.png                # Understanding check settings
+│   └── tamper.png                  # Tampering result
+├── chain-core.js                   # Chain and cryptography
+├── index.html                      # Four entrances and seven guided steps
+├── learning-progress.js            # Understanding checks and persistence
+├── messages.js                     # Japanese and English text
+├── package.json                    # Test command
+├── samples.js                      # Two fictional samples
+├── style.css                       # Layout and light/dark colors
+└── test/                           # Automated tests
+    ├── chain-vectors.json          # Independent chain vectors
+    ├── chain.test.js               # Chain and tampering checks
+    ├── contrast.test.js            # Contrast checks
+    ├── html.test.js                # HTML and CSP checks
+    ├── i18n.test.js                # Dictionary and wording checks
+    ├── learning-progress.test.js   # Understanding and storage checks
+    ├── learning.test.js            # Lesson and quiz checks
+    ├── protections.test.js         # Protection and role checks
+    └── readme.test.js              # Documentation consistency
 ```
 
 ## 💻 Requirements
