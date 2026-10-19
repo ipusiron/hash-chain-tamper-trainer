@@ -135,7 +135,7 @@
     core.PROTECTIONS.forEach(protection => {
       const select = $('protect-' + protection);
       if (select) {
-        document.querySelector('label[for="protect-' + protection + '"]').textContent = t('protection.' + protection);
+        document.querySelector('label[for="protect-' + protection + '"] span').textContent = t('protection.' + protection);
 
       }
     });
@@ -459,12 +459,12 @@
     state.changed = true;
   }));
   core.PROTECTIONS.forEach(protection => {
-    const group = node('div',undefined,'check-option');
-    const label = node('label', t('protection.' + protection));
-    label.htmlFor = 'protect-' + protection;
+    const group = node('label',undefined,'check-option');
+    const label = node('span', t('protection.' + protection));
+    group.htmlFor = 'protect-' + protection;
     const input = node('input');
     input.type = 'checkbox';
-    input.id = label.htmlFor;
+    input.id = group.htmlFor;
     group.append(input, label);
     $('protection-options').append(group);
     input.addEventListener('change', () => {
