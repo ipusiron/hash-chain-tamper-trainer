@@ -36,11 +36,16 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 *View the understood count, change whether checks are saved, or clear all understanding checks.*
 
+![Comparing middle and last records](assets/en/position.png)
+
+*After updating the contents and the target’s stored hash, compare record 2 and record 8 using the same verification rule.*
+
 ## ✨ Features
 
 | Entrance | Content |
 |---|---|
 | Learning path | Seven steps with an aim, open prerequisites, an action, What just happened, How it works and What you learned; from a one-character change to protections and questions |
+| Middle vs last | Apply identical actions to records 2 and 8. Diagrams distinguish current-chain verification from comparison with the original |
 | Free experiment | Two samples, row additions, seven modifications, all 16 protection combinations and computation details |
 | Learn | Four advanced and reference sections: Lamport chains; Git, Merkle trees and blockchains; the Day041 case study; references |
 | Settings | Save preferences and clear all understanding checks |
@@ -76,6 +81,8 @@ Free experiment provides build, tamper and protection experiments. Changing samp
 A side-by-side example connects the short display to all 64 characters, with the first 8 underlined. The calculation diagram separates the previous hash, separator and current record, and shows the actual input and output. Opening the exact input also shows every UTF-8 byte directly below it, with the byte count and character-to-byte examples.
 
 Diagrams show the status of all 8 rows, tail deletion, and the people who hold keys or independent copies. All four advanced sections have worked examples, and explanatory prose is divided into paragraphs by topic.
+
+Middle vs last applies three stages to two original copies: 0 original, 1 change only the contents, and 2 also update that record’s stored hash. The diagram follows the recomputed hash into the next record or the trailer. Toggle whether the original trailer is included. At stage 2, both target records match, but record 3 mismatches in the middle case and the original trailer mismatches in the last-record case. Excluding the trailer lets the last-record case pass without making it identical to the original. A separate comparison below each diagram shows changes from the original; expand all eight inputs and full hashes for details. Reset affects only this tab’s stage and trailer setting.
 
 ## 🔬 Chain format and verification results
 
@@ -242,13 +249,15 @@ hash-chain-tamper-trainer/        # Project root
 │   ├── chain.png                 # Chain view
 │   ├── en/                       # English screenshots
 │   │   ├── chain.png             # Chain view
+│   │   ├── position.png          # Middle versus last comparison
 │   │   ├── protections.png       # Protection and role table
 │   │   └── settings.png          # Understanding check settings
+│   ├── position.png              # Middle versus last comparison
 │   ├── protections.png           # Protection and role table
 │   ├── settings.png              # Understanding check settings
 │   └── tamper.png                # Tampering result
 ├── chain-core.js                 # Chain and cryptography
-├── index.html                    # Four entrances and seven guided steps
+├── index.html                    # Five entrances and seven guided steps
 ├── learning-progress.js          # Understanding checks and persistence
 ├── messages.js                   # Japanese and English text
 ├── package.json                  # Test command
