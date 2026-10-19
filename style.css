@@ -15,6 +15,8 @@
   --ok-bg: #e6f4ec;
   --cover-fg: #ffffff;
   --cover-bg: #1b1f24;
+  --compare-first-fg: #174675;
+  --compare-first-bg: #e8f1fc;
 }
 
 *, *::before, *::after {
@@ -141,6 +143,8 @@ label {
     --ok-bg: #10301f;
     --cover-fg: #0f1419;
     --cover-bg: #a3adb8;
+    --compare-first-fg: #bfdcff;
+    --compare-first-bg: #152c46;
   }
 }
 
@@ -357,7 +361,6 @@ progress { flex: 1; min-width: 0; height: 0.75rem; accent-color: var(--accent); 
 .comparison h3 { margin-block: 0.25rem; }
 .core-message { font-size: 1.25rem; line-height: 1.6; font-weight: 700; padding: 1rem; border: 2px solid var(--accent); }
 .avalanche { display: block; overflow-wrap: anywhere; background: var(--surface); padding: 0.75rem; }
-.changed-digit { color: var(--warn-fg); background: var(--warn-bg); text-decoration: underline; text-decoration-thickness: 2px; font-weight: 700; }
 .check-options { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-block: 1rem; }
 .check-option { display: flex; gap: 0.5rem; align-items: center; min-width: 44px; min-height: 44px; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
 @media (min-width: 760px) {
@@ -589,4 +592,20 @@ legend { max-width: 100%; }
   .data-flow { grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1.25fr) 5rem minmax(0, 1fr); align-items: stretch; }
   .data-flow .position-connector { flex-direction: column; text-align: center; gap: 0.25rem; padding-inline: 0.2rem; }
   .data-flow .position-arrow { transform: rotate(-90deg); flex-basis: auto; }
+}
+
+/* Equality is defined by the entire hash or record field, not individual characters. */
+.comparison-legend { grid-column: 1 / -1; margin-block: 0.75rem; font-size: 0.875rem; }
+.comparison-color-keys { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.comparison-legend p { margin-block: 0.5rem; }
+.compare-value.compare-same { color: var(--ok-fg); background: var(--ok-bg); border: 1px solid var(--ok-fg); }
+.compare-value.compare-first { color: var(--compare-first-fg); background: var(--compare-first-bg); border: 1px solid var(--compare-first-fg); }
+.compare-value.compare-second { color: var(--warn-fg); background: var(--warn-bg); border: 1px dashed var(--warn-fg); }
+code.compare-value, .comparison-color-keys .compare-value { padding: 0.25rem; border-radius: 3px; }
+.comparison-input { line-height: 2; }
+.comparison-input .compare-value { padding-block: 0.1rem; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.compare-value .visual-label, .compare-value .visual-hash, .compare-value .visual-hash strong, .visual-hash.compare-value strong { color: inherit; }
+.compare-value .visual-hash strong, .visual-hash.compare-value strong { text-decoration: none; }
+@media (forced-colors: active) {
+  .compare-value.compare-second { border-style: dashed; }
 }

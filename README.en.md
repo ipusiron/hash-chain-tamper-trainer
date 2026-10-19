@@ -38,7 +38,7 @@ Download the files and open `index.html` in a browser to use it over file://. No
 
 ![Comparing middle and last records](assets/en/position.png)
 
-*Step 3 connects input, UTF-8 encoding, SHA-256 and output, then compares the output with the stored hash.*
+*Step 3 connects input, UTF-8 encoding, SHA-256 and output, then compares the output with the stored hash. Equal values share green; different values use blue on the left or above and orange on the right or below. Each hash is compared as one complete 64-character value, without highlighting coincidentally equal characters. Input comparisons distinguish the previous hash and each record field.*
 
 ## ✨ Features
 
