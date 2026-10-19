@@ -539,9 +539,11 @@
     position.cases = cases;
   }
 
-  function positionPair(leftLabel, leftHash, rightLabel, rightHash, valid) {
+  function positionPair(leftLabel, leftHash, rightLabel, rightHash, valid, outputFirst = false) {
     const pair = node('div', undefined, 'position-pair');
-    for (const [key, label, hash] of [['stored', leftLabel, leftHash], ['recomputed', rightLabel, rightHash]]) {
+    const values = [['stored', leftLabel, leftHash], ['recomputed', rightLabel, rightHash]];
+    if (outputFirst) values.reverse();
+    for (const [key, label, hash] of values) {
       const cell = node('div', undefined, 'position-value');
       const code = node('code', shortHash(hash));
       code.title = hash;
@@ -556,32 +558,69 @@
     return pair;
   }
 
+  function positionInput(input, rowNumber) {
+    const box = node('div', undefined, 'diagram-input');
+    box.dataset.input = input;
+    box.append(node('strong', t('diagram.input')));
+    const prefix = node('p', undefined, 'position-prefix');
+    const hash = node('code', shortHash(input.slice(0, 64)));
+    hash.title = input.slice(0, 64);
+    hash.dataset.hash = input.slice(0, 64);
+    prefix.append(node('span', t(rowNumber ? 'diagram.previous' : 'diagram.last')), hash);
+    const record = node('div', undefined, 'diagram-record');
+    record.append(node('span', t(rowNumber ? 'diagram.record' : 'diagram.count', {n:rowNumber})),
+      node('code', input.slice(65), rowNumber ? 'position-fields' : 'diagram-count'));
+    box.append(prefix, node('code', '|', 'diagram-separator'), record);
+    return box;
+  }
+
+  function positionCalculation(card, input, stored, computed, valid, trailer = false) {
+    const bytes = new TextEncoder().encode(input);
+    card.dataset.input = input;
+    card.dataset.bytes = String(bytes.length);
+    card.append(positionArrow(t('diagram.utf8', {n:bytes.length})),
+      node('div', 'SHA-256', 'diagram-function'), positionArrow(t('diagram.outputArrow')),
+      positionPair(t(trailer ? 'position.originalTrailer' : 'diagram.stored'), stored,
+        t(trailer ? 'diagram.trailerOutput' : 'diagram.output'), computed, valid, true));
+    const exact = node('details', undefined, 'diagram-exact');
+    exact.append(node('summary', t('diagram.exact')), node('code', input, 'hash-input'), utf8InputExample(input, true, trailer ? 'trailer' : 'record'));
+    card.append(exact);
+  }
+
   function positionRecord(row, fields, target) {
     const card = node('div', undefined, 'position-record' + (target ? ' position-target' : ''));
     card.dataset.record = String(row.number);
     card.append(node('h6', t(target ? 'position.target' : 'position.next', {n:row.number})),
-      node('code', fields.join(','), 'position-fields'));
-    if (!target) card.append(node('p', t('position.nextUnchanged'), 'muted'));
-    const prefix = node('p', undefined, 'position-prefix');
-    const hash = node('code', shortHash(row.input.slice(0, 64)));
-    hash.title = row.input.slice(0, 64);
-    hash.dataset.hash = row.input.slice(0, 64);
-    prefix.append(t('position.inputPrefix'), hash);
-    card.append(prefix, positionPair(t('position.stored'), row.actual, t('position.recomputed'), row.expected, row.valid));
+      positionInput(row.input, row.number));
+    positionCalculation(card, row.input, row.actual, row.expected, row.valid);
+    const note = position.stage === 0 ? 'diagram.note.original' : target
+      ? 'diagram.note.target.' + position.stage : 'diagram.note.next';
+    card.append(node('p', t(note), 'diagram-callout'));
     return card;
   }
 
   function positionArrow(text) {
     const connector = node('div', undefined, 'position-connector');
-    const arrow = node('span', undefined, 'position-arrow');
+    const ns = 'http://www.w3.org/2000/svg';
+    const arrow = document.createElementNS(ns, 'svg');
+    arrow.setAttribute('class', 'position-arrow');
+    arrow.setAttribute('viewBox', '0 0 24 48');
+    arrow.setAttribute('width', '24');
+    arrow.setAttribute('height', '48');
     arrow.setAttribute('aria-hidden', 'true');
+    arrow.setAttribute('focusable', 'false');
+    const line = document.createElementNS(ns, 'line');
+    for (const [key, value] of Object.entries({x1:12, y1:2, x2:12, y2:30, stroke:'currentColor', 'stroke-width':3})) line.setAttribute(key, value);
+    const tip = document.createElementNS(ns, 'polygon');
+    tip.setAttribute('points', '4,30 20,30 12,44');
+    tip.setAttribute('fill', 'currentColor');
+    arrow.append(line, tip);
     connector.append(arrow, node('span', text));
     return connector;
   }
 
   function renderPosition() {
     $('guide-position').hidden = guide.step !== 3 || !guide.results[3];
-    $('position-illustration').alt = t('position.imageAlt');
     for (let i = 0; i < 3; i += 1) $('position-stage-' + i).setAttribute('aria-pressed', String(i === position.stage));
     $('position-trailer').checked = position.hasTrailer;
     $('position-status').textContent = t('position.state.' + position.stage);
@@ -610,8 +649,10 @@
       const trailer = node('div', undefined, 'position-trailer');
       trailer.append(node('h6', t('position.trailer')));
       if (position.hasTrailer) {
-        trailer.append(positionPair(t('position.originalTrailer'), all.trailer.actual,
-          t('position.recomputedTrailer'), all.trailer.expected, all.trailer.valid));
+        const input = core.trailerInput(all.rows[7].expected, all.rows.length);
+        trailer.append(positionInput(input, 0));
+        positionCalculation(trailer, input, all.trailer.actual, all.trailer.expected, all.trailer.valid, true);
+        trailer.append(node('p', t(position.stage === 0 ? 'diagram.note.original' : 'diagram.note.trailer'), 'diagram-callout'));
       } else trailer.append(node('p', t('position.noTrailer')));
       const overall = node('p', t(result.valid ? 'position.pass' : 'position.fail'), 'position-overall ' + (result.valid ? 'good' : 'bad'));
       overall.dataset.valid = String(result.valid);
@@ -1152,11 +1193,11 @@
     return block;
   }
 
-  function utf8InputExample(input, isRow) {
+  function utf8InputExample(input, isRow, kind = '') {
     const bytes = new TextEncoder().encode(input);
     const values = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'));
     const block = node('div', undefined, 'visual-bytes');
-    block.append(node('h4', t('visual.bytes.title', {count:bytes.length})),
+    block.append(node(kind ? 'strong' : 'h4', t('visual.bytes.title', {count:bytes.length})),
       node('p', t('visual.bytes.note')));
     const code = node('code', undefined, 'visual-byte-stream');
     values.forEach((value, i) => {
@@ -1167,7 +1208,7 @@
     block.append(code);
     if (isRow) {
       block.append(node('p', t('visual.bytes.characters', {a:input[0], b:input[1], x:values[0], y:values[1]})),
-        node('p', t('visual.bytes.parts', {record:bytes.length - 65, count:bytes.length})));
+        node('p', t(kind === 'trailer' ? 'diagram.trailerBytes' : 'visual.bytes.parts', {record:bytes.length - 65, count:bytes.length})));
     } else block.append(node('p', t('visual.bytes.header')));
     block.append(node('p', t('visual.bytes.use', {count:bytes.length}), 'visual-byte-note'));
     return block;
