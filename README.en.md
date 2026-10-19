@@ -53,7 +53,7 @@ Japanese, English, and light and dark themes are supported. Language changes pre
 
 ## 📖 Usage
 
-Step 1 starts with brief prerequisites and the card-access illustration, then leads to calculation. Expand the supporting material to inspect the format and data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
+Step 1 starts with the card-access illustration and a visible diagram separating the record, calculation input string, and output hash. It introduces the record/hash pair, the hash recalculated during verification, and the difference between comparing and updating. Record 1’s output appears only after its calculation button is pressed. Expand the supporting material to inspect the format and data overview: the header, eight record/hash pairs, the trailer and an independently held checkpoint. Pending hashes are replaced by actual results as you calculate. After all eight calculations, use Return to the completed data overview to inspect the finished structure.
 
 The Learning path opens first. Read the aim and prerequisites, then use the main button. What just happened includes calculated hashes and verification results. Read How it works and What you learned below for the reasons. Brief prerequisites are visible from the start; expand the supporting explanation and related tools in place. Steps 1–6 offer optional predictions that you can compare with the result. Predictions and disclosure states are not saved.
 

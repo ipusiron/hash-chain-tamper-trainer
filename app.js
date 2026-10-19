@@ -1000,6 +1000,42 @@
     return [observation('guide.waiting')];
   }
 
+  function dataIntroduction() {
+    const figure = visualFigure('data.title');
+    figure.id = 'guide-data-intro';
+    figure.append(node('p', t('data.intro')));
+    const record = samples[0].rows[0].join(',');
+    const seed = guide.partial.seed;
+    const input = core.hashInput(seed, samples[0].rows[0]);
+    const hash = guide.shown > 0 ? guide.partial.rows[0].hash : null;
+    const flow = node('div', undefined, 'data-flow');
+    const recordCard = visualCard(t('data.record'), record, t('data.recordNote'));
+    recordCard.dataset.dataKind = 'record';
+    const inputCard = visualCard(t('data.input'), input, t('data.inputNote'));
+    inputCard.dataset.dataKind = 'input';
+    const output = hash ? visualHash(hash) : node('p', t('data.pending'), 'muted');
+    const hashCard = visualCard(t('data.hash'), output, t('data.hashNote'));
+    hashCard.dataset.dataKind = 'hash'; hashCard.dataset.computed = String(!!hash);
+    flow.append(recordCard, positionArrow(t('data.join')), inputCard,
+      positionArrow(t('data.calculate', {count:new TextEncoder().encode(input).length})), hashCard);
+    figure.append(flow, node('p', t('data.seedNote'), 'data-note'));
+    const pair = node('div', undefined, 'data-kept-pair');
+    pair.append(node('strong', t('data.pair')), node('p', t('data.pairNote')));
+    const row = node('div', undefined, 'visual-grid');
+    row.append(visualCard(t('data.recordShort'), record),
+      visualCard(t('data.attached'), hash ? visualHash(hash) : t('data.pending')));
+    pair.append(row); figure.append(pair);
+    const verification = node('div', undefined, 'data-verification');
+    verification.append(node('strong', t('data.verifyTitle')), node('p', t('data.verifyIntro')));
+    const roles = node('div', undefined, 'visual-grid');
+    roles.append(visualCard(t('data.attached'), undefined, t('data.attachedNote')),
+      visualCard(t('data.recomputed'), undefined, t('data.recomputedNote')));
+    verification.append(roles, node('p', t('data.compare'), 'visual-conclusion'),
+      node('p', t('data.noUpdate')));
+    figure.append(verification, node('p', t('data.scope'), 'muted'));
+    return figure;
+  }
+
   function chainOverview() {
     const figure = node('figure', undefined, 'chain-overview');
     figure.id = 'guide-chain-overview';
@@ -1391,7 +1427,7 @@
     const background = $('guide-background');
     background.replaceChildren();
     background.append(node('p', t('clarity.prerequisite.' + step)));
-    if (step === 1) background.append(sampleIllustration());
+    if (step === 1) background.append(sampleIllustration(), dataIntroduction());
     const more = disclosure('guide-background-more-' + step, 'clarity.more');
     if (step === 1) more.append(disclosure('guide-overview-details', 'clarity.overview', chainOverview()),
       node('p', t('clarity.aimDetail.1')), node('p', t('guide.sampleFigure.direction')));

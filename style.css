@@ -575,3 +575,18 @@ legend { max-width: 100%; }
 
 .position-record .position-value code, .position-trailer .position-value code { font-size: 0.875rem; white-space: nowrap; }
 .position-record .position-value span, .position-trailer .position-value span { white-space: pre-line; }
+
+/* Introduce the record, calculation input and output before the first action. */
+.data-flow { display: grid; grid-template-columns: minmax(0, 1fr); margin-block: 1rem; }
+.data-flow > .visual-card { min-width: 0; }
+.data-flow .position-connector { justify-content: center; }
+.data-flow .position-arrow { flex: 0 0 24px; }
+.data-note { border-inline-start: 3px solid var(--accent); padding-inline-start: 0.75rem; }
+.data-kept-pair, .data-verification { margin-block-start: 1.25rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; }
+.data-kept-pair { background: var(--surface); }
+.data-kept-pair > strong, .data-verification > strong { display: block; font-size: 1rem; }
+@media (min-width: 900px) {
+  .data-flow { grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1.25fr) 5rem minmax(0, 1fr); align-items: stretch; }
+  .data-flow .position-connector { flex-direction: column; text-align: center; gap: 0.25rem; padding-inline: 0.2rem; }
+  .data-flow .position-arrow { transform: rotate(-90deg); flex-basis: auto; }
+}
