@@ -130,11 +130,11 @@ test('Related tools, known unverified coverage and developer commands are docume
   }
 });
 
-test('Both usage sections follow the seven steps and five entrances', () => {
+test('Both usage sections follow the seven steps and four entrances', () => {
   for (const [i,doc] of docs.entries()) {
     const usage = doc.split(i === 0 ? '## 📖 使い方' : '## 📖 Usage')[1].split('\n## ')[0];
     assert.deepEqual([...usage.matchAll(/^(\d)\. /gm)].map(m=>Number(m[1])),[1,2,3,4,5,6,7]);
-    for (const name of i===0 ? ['学習の流れ','途中と最後','自由に試す','座学','設定'] : ['Learning path','Middle vs last','Free experiment','Learn','Settings']) assert.ok(doc.includes(name));
+    for (const name of i===0 ? ['学習の流れ','自由に試す','座学','設定'] : ['Learning path','Free experiment','Learn','Settings']) assert.ok(doc.includes(name));
     assert.ok(usage.includes('09:05') && usage.includes('09:06'));
   }
 });

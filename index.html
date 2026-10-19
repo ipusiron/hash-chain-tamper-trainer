@@ -24,7 +24,6 @@
   <main>
     <nav class="entries" role="tablist" data-i18n-label="tabs">
       <button id="tab-guide" type="button" role="tab" aria-selected="true" aria-controls="panel-guide" tabindex="0" data-i18n="tab.guide"></button>
-      <button id="tab-position" type="button" role="tab" aria-selected="false" aria-controls="panel-position" tabindex="-1" data-i18n="tab.position"></button>
       <button id="tab-free" type="button" role="tab" aria-selected="false" aria-controls="panel-free" tabindex="-1" data-i18n="tab.free"></button>
       <button id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="panel-learn" tabindex="-1" data-i18n="tab.learn"></button>
       <button id="tab-settings" type="button" role="tab" aria-selected="false" aria-controls="panel-settings" tabindex="-1" data-i18n="tab.settings"></button>
@@ -57,23 +56,14 @@
       </section>
       <section id="guide-observation-section" class="guide-observation"><h3 data-i18n="guide.now"></h3><div id="guide-now" aria-live="polite"></div>
           <div id="guide-meaning"></div>
-          <div id="guide-visual"></div></section>
-      <div id="guide-result"></div>
-      <div id="guide-quiz" hidden>    <section id="panel-quiz" data-i18n-label="tab.quiz" hidden>
-      <h2 data-i18n="tab.quiz"></h2>
-      <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
-      <p id="quiz-level" class="quiz-level"></p>
-      <h3 id="quiz-prompt"></h3><div id="quiz-choices" class="quiz-choices"></div>
-      <div id="quiz-feedback" aria-live="polite"></div>
-      <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
-    </section></div>
-      <section id="guide-mechanism" class="guide-mechanism" tabindex="-1" aria-labelledby="guide-mechanism-heading"><h3 id="guide-mechanism-heading" data-i18n="guide.mechanism"></h3><button id="guide-back-to-quiz" data-i18n="quiz.back" hidden></button><div id="guide-explanation"></div></section>
-      <aside id="guide-takeaway" class="takeaway" hidden><h3 data-i18n="guide.learned"></h3><p class="multiline" id="guide-understood"></p></aside>
-      <div class="guide-navigation"><button id="guide-back" data-i18n="guide.back"></button><button id="guide-next" data-i18n="guide.next"></button></div>
-    </section>
-    <section id="panel-position" role="tabpanel" aria-labelledby="tab-position" hidden>
-      <h2 data-i18n="position.title"></h2>
+    <section id="guide-position" aria-labelledby="guide-position-heading" hidden>
+      <h4 id="guide-position-heading" tabindex="-1" data-i18n="position.title"></h4>
       <p data-i18n="position.intro" class="multiline"></p>
+      <figure class="chain-illustration">
+        <img id="position-illustration" src="assets/chain-positions.webp" width="1536" height="1024" alt="">
+        <figcaption><strong data-i18n="position.imageCaption"></strong><p data-i18n="position.imageNote" class="multiline"></p></figcaption>
+      </figure>
+      <p data-i18n="position.replay" class="multiline"></p>
       <div class="position-controls">
         <div class="position-stages" role="group" data-i18n-label="position.choose">
           <button id="position-stage-0" type="button" aria-pressed="true" data-i18n="position.stage.0"></button>
@@ -87,6 +77,21 @@
       <div id="position-cases" class="position-cases"></div>
       <p id="position-conclusion" class="visual-conclusion"></p>
       <p data-i18n="position.limit" class="muted"></p>
+      <aside class="position-handoff"><p data-i18n="position.handoff" class="multiline"></p><button id="position-next" type="button" data-i18n="position.nextStep"></button></aside>
+    </section>
+          <div id="guide-visual"></div></section>
+      <div id="guide-result"></div>
+      <div id="guide-quiz" hidden>    <section id="panel-quiz" data-i18n-label="tab.quiz" hidden>
+      <h2 data-i18n="tab.quiz"></h2>
+      <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
+      <p id="quiz-level" class="quiz-level"></p>
+      <h3 id="quiz-prompt"></h3><div id="quiz-choices" class="quiz-choices"></div>
+      <div id="quiz-feedback" aria-live="polite"></div>
+      <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
+    </section></div>
+      <section id="guide-mechanism" class="guide-mechanism" tabindex="-1" aria-labelledby="guide-mechanism-heading"><h3 id="guide-mechanism-heading" data-i18n="guide.mechanism"></h3><button id="guide-back-to-quiz" data-i18n="quiz.back" hidden></button><div id="guide-explanation"></div></section>
+      <aside id="guide-takeaway" class="takeaway" hidden><h3 data-i18n="guide.learned"></h3><p class="multiline" id="guide-understood"></p></aside>
+      <div class="guide-navigation"><button id="guide-back" data-i18n="guide.back"></button><button id="guide-next" data-i18n="guide.next"></button></div>
     </section>
     <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
       <h2 id="learning-settings-heading" tabindex="-1" data-i18n="settings.title"></h2>

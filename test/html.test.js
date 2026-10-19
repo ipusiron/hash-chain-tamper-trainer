@@ -38,10 +38,10 @@ test('No unsafe DOM writes, inline handlers, networking, workers or record persi
   assert.doesNotMatch(learning, /innerHTML|outerHTML|insertAdjacentHTML|\bfetch\s*\(|XMLHttpRequest|WebSocket/);
   assert.doesNotMatch(html, /type="file"|type="module"/);
 });
-test('Unique IDs, five entrances and three free-experiment tabs and explicit hidden override', () => {
+test('Unique IDs, four entrances and three free-experiment tabs and explicit hidden override', () => {
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(ids.length, new Set(ids).size);
-  for (const name of ['guide','position','free','learn','settings','build','tamper','protect']) {
+  for (const name of ['guide','free','learn','settings','build','tamper','protect']) {
     assert.match(html, new RegExp(`id="tab-${name}"[^>]*role="tab"[^>]*aria-controls="panel-${name}"`));
     assert.match(html, new RegExp(`id="panel-${name}"[^>]*role="tabpanel"[^>]*aria-labelledby="tab-${name}"`));
   }

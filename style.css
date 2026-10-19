@@ -286,13 +286,13 @@ blockquote {
 .position-stage-note { padding: 0.75rem; border-inline-start: 4px solid var(--accent); background: var(--surface); }
 .position-cases { display: grid; gap: 1rem; align-items: start; }
 .position-case { margin: 0; min-width: 0; }
-.position-case h3 { margin-block: 0.5rem; font-size: 1.125rem; }
+.position-case h5 { margin-block: 0.5rem; font-size: 1.125rem; }
 .position-time { margin-block: 0.5rem; }
 .position-flow.lesson-visual { margin: 0; padding: 0.75rem; }
 .position-unchanged { border: 1px dashed var(--border); padding: 0.5rem; text-align: center; color: var(--muted); }
 .position-record { position: relative; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
 .position-target { border-inline-start: 5px solid var(--accent); }
-.position-record h4, .position-trailer h4, .position-snapshot h4 { margin-block: 0 0.5rem; }
+.position-record h6, .position-trailer h6, .position-snapshot h6 { font-size: 1rem; margin-block: 0 0.5rem; }
 .position-fields { display: block; padding: 0.4rem; border-block: 1px solid var(--border); font-size: 0.875rem; }
 .position-prefix { font-size: 0.875rem; margin-block: 0.5rem; }
 .position-prefix code { display: inline-block; }
@@ -546,3 +546,10 @@ legend { max-width: 100%; }
 .guide-background-part p { margin-block: 0.75rem; }
 
 .lesson-visual .lesson-visual { margin-inline: 0; padding: 0; border: 0; background: transparent; }
+
+.chain-illustration { margin: 1rem 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.chain-illustration img { display: block; width: 100%; height: auto; background: #fff; }
+.chain-illustration figcaption { padding: 0.75rem; background: var(--bg); }
+.chain-illustration figcaption p { margin-block: 0.5rem 0; }
+.position-handoff { margin-block: 1rem; padding: 1rem; border-inline-start: 4px solid var(--accent); background: var(--bg); }
+#guide-position-heading { margin-block: 1.5rem 0.75rem; font-size: 1.25rem; }
