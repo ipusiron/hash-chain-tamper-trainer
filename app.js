@@ -602,6 +602,7 @@
 
   function positionPair(leftLabel, leftHash, rightLabel, rightHash, valid, outputFirst = false) {
     const pair = node('div', undefined, 'position-pair');
+    pair.dataset.valid = String(valid);
     const values = [['stored', leftLabel, leftHash], ['recomputed', rightLabel, rightHash]];
     if (outputFirst) values.reverse();
     for (const [key, label, hash] of values) {
@@ -610,7 +611,10 @@
       code.title = hash;
       code.dataset.hash = hash;
       cell.dataset.side = key;
-      comparisonTone(code, hash, key === 'stored' ? rightHash : leftHash, pair.childElementCount === 0 ? 'first' : 'second');
+      const peer = key === 'stored' ? rightHash : leftHash;
+      const side = pair.childElementCount === 0 ? 'first' : 'second';
+      comparisonTone(cell, hash, peer, side);
+      comparisonTone(code, hash, peer, side);
       cell.append(node('span', label), code);
       pair.append(cell);
     }
@@ -640,6 +644,7 @@
     const bytes = new TextEncoder().encode(input);
     card.dataset.input = input;
     card.dataset.bytes = String(bytes.length);
+    card.dataset.valid = String(valid);
     card.append(positionArrow(t('diagram.utf8', {n:bytes.length})),
       node('div', 'SHA-256', 'diagram-function'), positionArrow(t('diagram.outputArrow')),
       positionPair(t(trailer ? 'position.originalTrailer' : 'diagram.stored'), stored,
