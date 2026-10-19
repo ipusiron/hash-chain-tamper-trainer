@@ -1540,9 +1540,138 @@
     return figure;
   }
 
+  // Overview drawings describe operations; calculated values remain in the result diagrams.
+  function stepIllustration(step) {
+    const text = key => t('sketch.' + key);
+    const figure = node('figure', undefined, 'step-illustration');
+    figure.dataset.step = String(step);
+    const caption = node('figcaption', text(step + '.title'));
+    caption.id = 'step-illustration-caption';
+    figure.setAttribute('aria-labelledby', caption.id);
+    figure.append(caption);
+    const label = key => node('span', text(key), 'sketch-label');
+    const chip = key => node('span', text(key), 'sketch-chip');
+    const box = (title, ...children) => {
+      const item = node('div', undefined, 'sketch-box');
+      item.append(node('strong', title, 'sketch-box-title'), ...children);
+      return item;
+    };
+    const flow = (items, arrows = []) => {
+      const row = node('div', undefined, 'sketch-flow');
+      items.forEach((item, i) => {
+        if (i) {
+          const connector = positionArrow(arrows[i - 1] || text('next'));
+          const horizontal = connector.querySelector('svg').cloneNode(true);
+          horizontal.setAttribute('class', 'sketch-arrow-horizontal');
+          horizontal.setAttribute('viewBox', '0 0 112 24');
+          horizontal.setAttribute('width', '112'); horizontal.setAttribute('height', '24');
+          const line = horizontal.querySelector('line');
+          for (const [key, value] of Object.entries({x1:2, y1:12, x2:96, y2:12})) line.setAttribute(key, value);
+          horizontal.querySelector('polygon').setAttribute('points', '96,4 96,20 110,12');
+          connector.insertBefore(horizontal, connector.lastChild);
+          row.append(connector);
+        }
+        row.append(item);
+      });
+      return row;
+    };
+    const note = key => node('p', text(key), 'sketch-note');
+    const hash = key => node('div', text(key), 'sketch-hash');
+    const change = (n, value) => {
+      const row = node('div', undefined, 'sketch-change');
+      row.dataset.record = String(n);
+      row.dataset.before = samples[0].rows[n - 1][0];
+      row.dataset.after = value;
+      const oldValue = node('code', row.dataset.before);
+      const newValue = node('code', value);
+      comparisonTone(oldValue, row.dataset.before, value, 'first');
+      comparisonTone(newValue, value, row.dataset.before, 'second');
+      const before = node('div'); before.append(label('before'), oldValue);
+      const after = node('div'); after.append(label('after'), newValue);
+      row.append(before, after);
+      return row;
+    };
+    const record = (n, value) => box(t('visual.row', {n}), label('time'), change(n, value));
+    const pair = (a, b) => {
+      const comparison = node('div', undefined, 'sketch-compare');
+      comparison.append(hash(a), node('strong', text('compare'), 'sketch-compare-label'), hash(b));
+      return comparison;
+    };
+    const rows = (start, end, kind = '') => {
+      const strip = node('div', undefined, 'sketch-records ' + kind);
+      for (let n = start; n <= end; n += 1) strip.append(node('span', t('visual.row', {n}), 'sketch-record'));
+      return strip;
+    };
+    if (step === 1) {
+      const calculation = n => {
+        const input = node('div', undefined, 'sketch-input');
+        input.append(label('input'), chip(n === 1 ? 'seed' : 'output1'), node('code', '|', 'sketch-separator'),
+          node('span', t('visual.row', {n}), 'sketch-chip'));
+        const calc = box(text(n === 1 ? 'calculation1' : 'calculation2'), input,
+          positionArrow(text('utf8')), node('div', 'SHA-256', 'sketch-function'),
+          positionArrow(text('output')), hash(n === 1 ? 'output1' : 'output2'));
+        return calc;
+      };
+      figure.append(flow([calculation(1), calculation(2)], [text('feedsNext')]), note('1.note'));
+    } else if (step === 2) {
+      const input = record(2, '09:06');
+      input.append(chip('previousUnchanged'));
+      const calculation = box(text('recalculate'), label('changedInput'),
+        node('div', 'UTF-8 / SHA-256', 'sketch-function'), hash('recomputed'));
+      const comparison = box(text('verification'), pair('recomputed', 'originalStored'), chip('keepStored'));
+      figure.append(flow([input, calculation, comparison], [text('buildInput'), text('compare')]), note('2.note'));
+    } else if (step === 3) {
+      const cases = node('div', undefined, 'sketch-cases');
+      for (const [n, value, title, nextTitle, nextDetail] of [
+        [2, '09:06', 'middle', 'record3', 'nextInputChanged'],
+        [8, '09:51', 'last', 'trailer', 'lastInputChanged']
+      ]) {
+        const lane = node('div', undefined, 'sketch-case');
+        lane.append(node('strong', text(title), 'sketch-case-title'));
+        const target = record(n, value);
+        target.append(hash('updateOnlyThis'));
+        const next = box(text(nextTitle), label(nextDetail), hash(n === 2 ? 'keepNextStored' : 'keepTrailer'));
+        lane.append(target, positionArrow(text('feedsNext')), next);
+        cases.append(lane);
+      }
+      figure.append(cases, note('3.note'));
+    } else if (step === 4) {
+      const changed = record(2, '09:06');
+      changed.append(chip('keepChangedTime'));
+      const rebuild = box(text('rebuild'), label('allRecords'), rows(1, 8),
+        hash('updateHashes'), hash('updateTrailer'));
+      const comparison = box(text('verification'), pair('updatedStored', 'recomputed'));
+      figure.append(flow([changed, rebuild, comparison], [text('useRecords'), text('compare')]), note('4.note'));
+    } else if (step === 5) {
+      const original = box(text('originalEight'), rows(1, 6), label('remove'), rows(7, 8, 'sketch-removed'));
+      const keep = box(text('remainingSix'), chip('keepRecords'), hash('keepSixHashes'));
+      const comparison = box(text('trailerComparison'), pair('originalEightTrailer', 'sixTrailer'));
+      figure.append(flow([original, keep, comparison], [text('removeTwo'), text('alsoCheckTrailer')]), note('5.note'));
+    } else if (step === 6) {
+      const edit = record(2, 'CHANGED');
+      edit.append(label('marker'));
+      const roles = box(text('whoChanges'));
+      for (const [person, key] of [['outsider', 'noKey'], ['recorder', 'hasKey']]) {
+        const role = node('div', undefined, 'sketch-role');
+        role.append(node('strong', text(person)), chip(key)); roles.append(role);
+      }
+      roles.append(label('tryRebuild'));
+      const verify = box(text('fourProtections'), chip('checkpoint'), chip('hmac'), chip('signature'), chip('timestamp'));
+      figure.append(flow([edit, roles, verify], [text('sameEdit'), text('testDetection')]), note('6.note'));
+    } else {
+      const changed = box(text('question1'), chip('recordContent'), chip('attachedHash'));
+      const retained = box(text('question2'), chip('nextHash'), chip('trailer'), chip('checkpoint'));
+      const compare = box(text('question3'), pair('recomputed', 'comparisonValue'), chip('whoHasKey'));
+      figure.append(flow([changed, retained, compare], [text('traceConditions'), text('decideComparison')]), note('7.note'));
+    }
+    figure.append(node('p', text(step === 7 ? 'quizReading' : 'reading'), 'sketch-reading'));
+    return figure;
+  }
+
   function renderGuideExplanation() {
     const step = guide.step;
     $('guide-aim').textContent = t('guide.' + step + '.aim');
+    $('guide-illustration').replaceChildren(stepIllustration(step));
     const background = $('guide-background');
     background.replaceChildren();
     background.append(node('p', t('clarity.prerequisite.' + step)));
