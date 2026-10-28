@@ -186,7 +186,7 @@ Anyone who knows the public construction can rechain the records. The exercise d
 - A time-stamp attests prior existence of a tip, not the truth of its contents.
 - The simulated authority signs using a key inside the page. A real authority's private key is not held by its users.
 - The verifier independently knows the closing deadline. The simulated clock uses steps 1–4, not real time.
-- File import and Day041 CSV v3 verification are planned for the second installment and are not implemented here.
+- File import and Day041 CSV v3 verification are not implemented.
 
 IPUSIRON writes technical books about security. The author does not encourage misuse of this tool.
 
