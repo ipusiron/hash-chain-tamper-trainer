@@ -118,7 +118,7 @@ test('Both readmes describe first mismatch and rechaining for seven modification
 });
 test('Related tools, known unverified coverage and developer commands are documented', () => {
   for(const doc of docs) {
-    for(const slug of ['hash-detector', 'git-secrets-playground', 'mic-gain-logger', 'basexx-visualizer', 'jwt-inspector', 'hashviz', 'hex-dump-trainer', 'otp-animation']) assert.ok(doc.includes('https://ipusiron.github.io/'+slug+'/'));
+    for(const slug of ['sha256-byte-inspector', 'git-secrets-playground', 'mic-gain-logger', 'basexx-visualizer', 'jwt-inspector', 'hex-dump-trainer', 'otp-animation']) assert.ok(doc.includes('https://ipusiron.github.io/'+slug+'/'));
     assert.match(doc,/Safari/);
     assert.match(doc,/npm test/);
     assert.match(doc,/node --check/);

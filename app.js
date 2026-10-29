@@ -13,7 +13,7 @@
   const expanded = new Set();
   const matrixSelection = { free: null, guide: null };
   const freeTabs = ['build', 'tamper', 'protect'];
-  const lessonTools = [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
+  const lessonTools = [['118'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []];
   const lessonRows = [4, 4, 5, 4, 4, 4, 5, 3, 4, 4, 4];
   const quizAnswers = [1, 2, 0, 1, 2, 0, 1, 2];
   const retainedLessons = [7, 8, 9, 10];
