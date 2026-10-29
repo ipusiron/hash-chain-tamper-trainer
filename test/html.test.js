@@ -79,12 +79,11 @@ test('Dynamic reference links match the exact approved list in both languages', 
   "https://github.com/ipusiron/mic-gain-logger/blob/main/docs/csv.md",
   "https://doi.org/10.6028/NIST.FIPS.180-4",
   "https://www.rfc-editor.org/rfc/rfc4231",
-  "https://ipusiron.github.io/hash-detector/",
+  "https://ipusiron.github.io/sha256-byte-inspector/",
   "https://ipusiron.github.io/git-secrets-playground/",
   "https://ipusiron.github.io/mic-gain-logger/",
   "https://ipusiron.github.io/basexx-visualizer/",
   "https://ipusiron.github.io/jwt-inspector/",
-  "https://ipusiron.github.io/hashviz/",
   "https://ipusiron.github.io/hex-dump-trainer/",
   "https://ipusiron.github.io/otp-animation/"
 ];

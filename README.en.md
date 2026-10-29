@@ -223,12 +223,11 @@ Each step links the references for its explanation. The references section in Le
 - [FIPS 180-4 — Secure Hash Standard](https://doi.org/10.6028/NIST.FIPS.180-4)
 - [RFC 4231 — HMAC-SHA test vectors](https://www.rfc-editor.org/rfc/rfc4231)
 
-- [Day002 Hash Identifier](https://ipusiron.github.io/hash-detector/): Hash string formats
+- [Day118 SHA-256 Byte Inspector](https://ipusiron.github.io/sha256-byte-inspector/): UTF-8 bytes and SHA-256 calculation
 - [Day031 Git Secrets Playground](https://ipusiron.github.io/git-secrets-playground/): Computing Git objects
 - [Day041 Mic Gain Logger](https://ipusiron.github.io/mic-gain-logger/): Logs and a rechaining case study
 - [Day052 BaseXX Visualizer](https://ipusiron.github.io/basexx-visualizer/): Encoding byte sequences
 - [Day053 JWT Inspector](https://ipusiron.github.io/jwt-inspector/): HMAC and signature verification
-- [Day056 HashViz](https://ipusiron.github.io/hashviz/): Avalanche effect and collisions
 - [Day114 Hex Dump Trainer](https://ipusiron.github.io/hex-dump-trainer/): Hexadecimal and bytes
 - [Day029 OTP Animation](https://ipusiron.github.io/otp-animation/): One-time pad, distinct from the Lamport construction
 

@@ -44,7 +44,7 @@ test('The final-row exception, timestamp assumption and Day041 digest length are
 test('Every lesson starts with bilingual prerequisites and the requested tool mapping', () => {
   for (const lang of ['ja','en']) for (let i=1;i<=11;i+=1) assert.ok(messages[lang]['lesson.'+i+'.prerequisite'].length>30);
   assert.deepEqual(JSON.parse(/const lessonTools = (\[[^;]+\]);/.exec(app)[1].replace(/'/g,'"')),
-    [['056','002'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []]);
+    [['118'], ['114','052'], [], [], [], [], ['053'], ['029'], ['031'], ['041'], []]);
   assert.match(messages.ja['lesson.8.distinction'],/Day029.*ワンタイムパッド.*Lamport/);
   for (const term of ['原像計算困難性','第二原像計算困難性','衝突困難性']) {
     assert.ok(Object.values(messages.ja).some(value=>value.startsWith(term+'（')));
