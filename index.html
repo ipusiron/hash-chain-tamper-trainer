@@ -44,7 +44,7 @@
       <div id="guide-state" class="experiment-state" hidden></div>
       <div id="guide-prediction"></div>
       <div id="guide-options" class="check-options" hidden></div>
-      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-build-reset" data-i18n="guide.build.reset" hidden></button><button id="guide-build-next" data-i18n="guide.build.nextStep" hidden></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
+      <div class="actions"><button id="guide-action" class="primary"></button><button id="guide-build-reset" data-i18n="guide.build.reset" hidden></button><button id="guide-build-next" class="nav-button" data-i18n="guide.build.nextStep" hidden></button><button id="guide-reset" data-i18n="resetTamper" hidden></button></div>
       <div id="guide-build-progress" hidden>
         <figure class="build-progress" aria-labelledby="guide-build-caption">
           <figcaption id="guide-build-caption"></figcaption>
@@ -74,21 +74,21 @@
       <div id="position-cases" class="position-cases"></div>
       <p id="position-conclusion" class="visual-conclusion"></p>
       <p data-i18n="position.limit" class="muted"></p>
-      <aside class="position-handoff"><p data-i18n="position.handoff" class="multiline"></p><button id="position-next" type="button" data-i18n="position.nextStep"></button></aside>
+      <aside class="position-handoff"><p data-i18n="position.handoff" class="multiline"></p><button id="position-next" class="nav-button" type="button" data-i18n="position.nextStep"></button></aside>
     </section>
           <div id="guide-visual"></div></section>
       <div id="guide-result"></div>
       <div id="guide-quiz" hidden>    <section id="panel-quiz" data-i18n-label="tab.quiz" hidden>
-      <h2 data-i18n="tab.quiz"></h2>
+      <h2 id="quiz-heading" tabindex="-1" data-i18n="tab.quiz"></h2>
       <label for="question-select" data-i18n="quiz.choose"></label><select id="question-select"></select>
       <p id="quiz-level" class="quiz-level"></p>
       <h3 id="quiz-prompt" class="multiline"></h3><div id="quiz-choices" class="quiz-choices"></div>
       <div id="quiz-feedback" aria-live="polite"></div>
-      <div class="actions"><button id="quiz-related" data-i18n="quiz.related"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
+      <div class="actions"><button id="quiz-related" class="nav-button"></button><button id="quiz-reset" data-i18n="quiz.reset"></button></div>
     </section></div>
-      <section id="guide-mechanism" class="guide-mechanism" tabindex="-1" aria-labelledby="guide-mechanism-heading"><h3 id="guide-mechanism-heading" data-i18n="guide.mechanism"></h3><button id="guide-back-to-quiz" data-i18n="quiz.back" hidden></button><div id="guide-explanation"></div></section>
+      <section id="guide-mechanism" class="guide-mechanism" tabindex="-1" aria-labelledby="guide-mechanism-heading"><h3 id="guide-mechanism-heading" data-i18n="guide.mechanism"></h3><button id="guide-back-to-quiz" class="nav-button" data-i18n="quiz.back" hidden></button><div id="guide-explanation"></div></section>
       <aside id="guide-takeaway" class="takeaway"><h3 data-i18n="guide.learned"></h3><p id="guide-takeaway-preview" class="muted" data-i18n="learning.preview"></p><p class="multiline" id="guide-understood"></p></aside>
-      <div class="guide-navigation"><button id="guide-back" data-i18n="guide.back"></button><button id="guide-next" data-i18n="guide.next"></button></div>
+      <div class="guide-navigation"><button id="guide-back" class="nav-button" data-i18n="guide.back"></button><button id="guide-next" class="nav-button" data-i18n="guide.next"></button></div>
     </section>
     <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
       <h2 id="learning-settings-heading" tabindex="-1" data-i18n="settings.title"></h2>
@@ -127,6 +127,7 @@
     <section id="panel-build" role="tabpanel" aria-labelledby="tab-build">
       <h2 data-i18n="build.title"></h2><p data-i18n="build.intro"></p>
       <div class="actions"><button id="step-start" data-i18n="stepStart"></button><button id="step-next" data-i18n="stepNext"></button><button id="step-all" data-i18n="stepAll"></button></div>
+      <p id="step-next-note" class="muted disabled-note" hidden></p>
       <p id="progress" aria-live="polite"></p>
       <div id="build-chain"></div>
       <h3 data-i18n="addTitle"></h3><p id="fields-note" class="muted" data-i18n="fieldsNote"></p>
@@ -149,7 +150,7 @@
       <details class="learning-details"><summary data-i18n="clarity.rows"></summary><div id="tampered-chain"></div></details>
     </section>
     <section id="panel-protect" role="tabpanel" aria-labelledby="tab-protect" hidden>
-      <h2 data-i18n="protect.title"></h2><p data-i18n="rechainIntro"></p>
+      <h2 id="protect-heading" tabindex="-1" data-i18n="protect.title"></h2><p data-i18n="rechainIntro"></p>
       <button id="rechain" data-i18n="rechain"></button><div id="rechain-result" aria-live="polite"></div>
       <p class="privacy" data-i18n="coreLesson"></p>
       <h3 data-i18n="matrixTitle"></h3><p data-i18n="matrixIntro"></p>
@@ -167,9 +168,9 @@
     <section id="panel-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
       <h2 data-i18n="tab.learn"></h2>
       <label for="lesson-select" data-i18n="lesson.choose"></label><select id="lesson-select"></select>
-      <div class="actions"><button id="lesson-previous" data-i18n="lesson.previous"></button><button id="lesson-next" data-i18n="lesson.next"></button><button id="back-to-quiz" data-i18n="quiz.back" hidden></button></div>
+      <div class="actions"><button id="lesson-previous" data-i18n="lesson.previous"></button><button id="lesson-next" data-i18n="lesson.next"></button><button id="back-to-quiz" class="nav-button" data-i18n="quiz.back" hidden></button></div>
       <article id="lesson-content" tabindex="-1"></article>
-      <button id="lesson-try" data-i18n="lesson.try"></button><button id="lesson-quiz" data-i18n="guide.openQuiz"></button>
+      <div class="actions"><button id="lesson-try" class="nav-button" data-i18n="lesson.try"></button><button id="lesson-quiz" class="nav-button" data-i18n="guide.openQuiz"></button></div>
     </section>
 
   </main>
