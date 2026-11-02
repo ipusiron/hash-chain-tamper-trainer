@@ -67,7 +67,7 @@ The Learning path opens first. Read the aim and prerequisites, then use the main
 6. Add protections: select a held checkpoint, HMAC, a signature or a simulated time-stamp. Compare an outsider with the key-holding recorder. Test the checkpoint role introduced in the step-1 overview. Select any verdict to inspect available keys and detection evidence.
 7. Check your understanding: answer eight questions. Questions 1–6 cover the core experiments and lead to explanations within the relevant step; questions 7–8 cover advanced topics and lead to Learn. Both destinations let you return to the same question.
 
-Use Next, Back or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
+Use Next step, Previous step or the step bar to jump freely. On narrow screens, open Choose a step. Steps 2–4 continue the same record and provide a reset button. Starting at a later step prepares the preceding records as needed.
 
 Each step’s aim identifies the records, the specific edit, and the values to compare, so the experiment’s conditions are clear even when you start at that step. Each step distinguishes changing a record, updating its stored hash, and comparing values during verification. The trailer example keeps the original trailer for comparison, and the protection examples identify who holds the keys and the independent checkpoint.
 
@@ -277,6 +277,7 @@ hash-chain-tamper-trainer/          # Project root
 ├── style.css                       # Layout and light/dark colors
 └── test/                           # Automated tests
     ├── chain-vectors.json          # Independent chain vectors
+    ├── a11y.test.js                # Announcement and navigation checks
     ├── chain.test.js               # Chain and tampering checks
     ├── contrast.test.js            # Contrast checks
     ├── html.test.js                # HTML and CSP checks

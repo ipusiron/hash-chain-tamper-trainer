@@ -42,6 +42,19 @@
     return element;
   }
 
+  // Live regions are written only when their content changes, so one action is announced once.
+  function setText(element, text) {
+    if (element.textContent === text) return false;
+    element.textContent = text;
+    return true;
+  }
+
+  function replaceIfChanged(container, children) {
+    const current = container.childNodes;
+    if (current.length === children.length && children.every((child, i) => child.isEqualNode(current[i]))) return false;
+    container.replaceChildren(...children);
+    return true;
+  }
 
   function disclosure(id, label, ...children) {
     const details = node('details', undefined, 'learning-details');
@@ -81,6 +94,11 @@
     return { includeHeader: $('header-select').value === 'yes', hasTrailer: $('trailer-select').value === 'yes' };
   }
 
+  // Step-by-step computing is available only after starting it and before the last record.
+  function stepNextBlocked(chain, completed) {
+    return !chain || completed >= chain.rows.length;
+  }
+
   function setBusy(busy) {
     state.busy = busy;
     document.body.setAttribute('aria-busy', String(busy));
@@ -88,7 +106,11 @@
       if (element.id !== 'lang-toggle' && element.getAttribute('role') !== 'tab') element.disabled = busy;
     });
     if (!busy) {
-      $('step-next').disabled = !state.base || state.completed >= state.base.rows.length;
+      const nextBlocked = stepNextBlocked(state.base, state.completed);
+      $('step-next').disabled = nextBlocked;
+      $('step-next-note').hidden = !nextBlocked;
+      if (nextBlocked) $('step-next').setAttribute('aria-describedby', 'step-next-note');
+      else $('step-next').removeAttribute('aria-describedby');
       $('add-row').disabled = !state.base || state.base.rows.length >= 100;
       $('guide-back').disabled = guide.step === 1;
       $('guide-next').disabled = guide.step === 7;
@@ -102,16 +124,17 @@
     if (state.busy) return;
     setBusy(true);
     state.error = null;
-    $('error').textContent = '';
-    $('announcement').textContent = t('busy');
+    setText($('error'), '');
+    // Clear silently so the single completion message is announced again after each action.
+    setText($('announcement'), '');
     try {
       await action();
       render();
-      $('announcement').textContent = t('ready');
+      setText($('announcement'), t('ready'));
     } catch (error) {
       state.error = Object.hasOwn(messages.en, 'error.' + error.message) ? error.message : 'generic';
-      $('error').textContent = t('error.' + state.error);
-      $('announcement').textContent = '';
+      setText($('error'), t('error.' + state.error));
+      setText($('announcement'), '');
     } finally {
       setBusy(false);
     }
@@ -125,6 +148,7 @@
       if (el.tagName === 'P') el.classList.toggle('multiline', el.textContent.includes('\n'));
     });
     document.querySelectorAll('[data-i18n-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nLabel)); });
+    $('step-next-note').textContent = t('stepNextNote', {next:t('stepNext'), start:t('stepStart')});
     replaceOptions($('sample-select'), samples.map((item, i) => [i, t(item.labelKey)]));
     replaceOptions($('operation'), core.OPERATIONS.map(operation => [operation, t('op.' + operation)]));
     replaceOptions($('target-column'), sample().columns.map((column, i) => [i, t('col.' + column)]));
@@ -209,22 +233,22 @@
   }
 
   function renderResult(container, result, compact = false) {
-    container.replaceChildren();
-    if (!result) return;
+    if (!result) { replaceIfChanged(container, []); return; }
     const key = result.firstMismatch ? 'status.row' : result.valid ? 'status.ok' :
       result.trailer.present ? 'status.trailer' : 'status.missing';
     container.dataset.valid = String(result.valid);
     container.dataset.first = result.firstMismatch === null ? '' : String(result.firstMismatch);
     container.className = 'result ' + (result.valid ? 'good' : 'bad');
-    container.append(node('h3', (result.valid ? '✓ ' : '× ') + t(key, { n: result.firstMismatch || result.rows.length })));
-    container.append(node('p', t(!result.trailer.required ? 'trailer.absent' : result.trailer.valid ? 'trailer.ok' : 'trailer.bad')));
+    const children = [node('h3', (result.valid ? '✓ ' : '× ') + t(key, { n: result.firstMismatch || result.rows.length })),
+      node('p', t(!result.trailer.required ? 'trailer.absent' : result.trailer.valid ? 'trailer.ok' : 'trailer.bad'))];
     if (!result.valid) {
       const evidence = compact ? node('details') : node('div');
       if (compact) evidence.append(node('summary', t('details')));
       evidence.append(node('p', t('expected')), node('code', result.expected || '-', 'hash'),
         node('p', t('actual')), node('code', result.actual || '-', 'hash'));
-      container.append(evidence);
+      children.push(evidence);
     }
+    replaceIfChanged(container, children);
   }
 
   function renderMatrix(destination = $('matrix'), matrix = state.matrix, trace = true) {
@@ -326,7 +350,7 @@
   function render() {
     localize();
     if (state.base) {
-      $('progress').textContent = t('progress', {done:state.completed, total:state.base.rows.length});
+      setText($('progress'), t('progress', {done:state.completed, total:state.base.rows.length}));
       renderChain($('build-chain'), state.shown, null, state.completed < state.base.rows.length);
       renderChain($('tampered-chain'), state.working, state.verified);
       renderResult($('tamper-result'), state.verified);
@@ -337,7 +361,7 @@
     }
     renderLearning();
     renderGuide();
-    if (state.error) $('error').textContent = t('error.' + state.error);
+    if (state.error) setText($('error'), t('error.' + state.error));
   }
 
   function showTab(name, focus = false) {
@@ -411,7 +435,7 @@
     language = language === 'ja' ? 'en' : 'ja';
     try { localStorage.setItem('hash-chain-tamper-trainer.lang', language); } catch (_) { /* Optional storage. */ }
     render();
-    $('announcement').textContent = t(state.busy ? 'busy' : 'ready');
+    setText($('announcement'), t(state.busy ? 'busy' : 'ready'));
   });
   for (const id of ['sample-select', 'header-select', 'trailer-select']) $(id).addEventListener('change', () => perform(rebuild));
   $('step-start').addEventListener('click', () => perform(async () => {
@@ -690,7 +714,7 @@
     $('guide-position').hidden = guide.step !== 3 || !guide.results[3];
     for (let i = 0; i < 3; i += 1) $('position-stage-' + i).setAttribute('aria-pressed', String(i === position.stage));
     $('position-trailer').checked = position.hasTrailer;
-    $('position-status').textContent = t('position.state.' + position.stage);
+    setText($('position-status'), t('position.state.' + position.stage));
     $('position-conclusion').textContent = t('position.conclusion.' + position.stage + (position.hasTrailer ? '.with' : '.without'));
     renderPositionCases($('position-cases'), position);
   }
@@ -818,6 +842,9 @@
     $('back-to-quiz').hidden = state.returnQuestion === null;
     const content = $('lesson-content');
     const prefix = 'lesson.' + (state.lesson + 1);
+    const destination = quizDestinations[state.question];
+    $('quiz-related').textContent = destination.step ? t('quiz.related.step', {n:destination.step})
+      : t('quiz.related.lesson', {title:t('lesson.' + (destination.lesson + 1) + '.title').replace(/^\d+\. /,'')});
     content.replaceChildren(node('h3', t(prefix + '.title').replace(/^\d+\. /,'')),$('back-to-quiz'),lessonPrerequisite(state.lesson));
     lessonBody(state.lesson, content);
     replaceOptions($('question-select'), quizAnswers.map((_, i) => [i, t('quiz.question', {n:i + 1}) + ' / ' + t(i < 6 ? 'clarity.quiz.core' : 'clarity.quiz.advanced')]));
@@ -839,15 +866,15 @@
       });
       $('quiz-choices').append(button);
     }
-    $('quiz-feedback').replaceChildren();
     const answered = Object.hasOwn(state.answers, state.question);
     if (answered) {
       const correct = state.answers[state.question] === quizAnswers[state.question];
       $('quiz-feedback').dataset.correct = String(correct);
       $('quiz-feedback').className = 'result ' + (correct ? 'good' : 'bad');
-      $('quiz-feedback').append(node('p', t(correct ? 'quiz.correct' : 'quiz.incorrect')),
-        node('p', t(questionPrefix + '.explanation')));
+      replaceIfChanged($('quiz-feedback'), [node('p', t(correct ? 'quiz.correct' : 'quiz.incorrect')),
+        node('p', t(questionPrefix + '.explanation'))]);
     } else {
+      replaceIfChanged($('quiz-feedback'), []);
       $('quiz-feedback').className = '';
       delete $('quiz-feedback').dataset.correct;
     }
@@ -896,7 +923,10 @@
     renderLearning();
     renderGuide();
   });
-  $('lesson-try').addEventListener('click', () => showTab('protect', true));
+  $('lesson-try').addEventListener('click', () => {
+    showTab('protect');
+    $('protect-heading').focus();
+  });
 
   const guide = { step: 1, base: null, partial: null, firstHash: null, shown: 0, modified: null, single: null, rebuilt: null,
     results: {}, selected: [], matrix: null, quizOpen: false, prepared: false, cut: null, trailerRebuilt: null, predictions: {} };
@@ -1737,7 +1767,7 @@
     if (step === 2) more.append(node('p',t('guide.avalanche')));
     if (step === 7) more.append(node('p',t('guide.7.prerequisite')));
     background.append(more);
-    $('guide-now').replaceChildren(...guideObservation().flatMap(({key, values}) =>
+    replaceIfChanged($('guide-now'), guideObservation().flatMap(({key, values}) =>
       messages[language][key].split('\n').map(template => observationParagraph(template, values))));
     $('guide-meaning').replaceChildren();
     if (step >= 2 && step <= 4 && guide.results[step]) $('guide-meaning').append(resultMeaning(guide.results[step]));
@@ -1793,7 +1823,7 @@
       return item;
     });
     $('guide-build-rows').replaceChildren(...rows);
-    $('guide-build-status').textContent = t(guide.shown === total ? 'guide.build.finished' : 'guide.build.status', {done:guide.shown, total, n:guide.shown + 1});
+    setText($('guide-build-status'), t(guide.shown === total ? 'guide.build.finished' : 'guide.build.status', {done:guide.shown, total, n:guide.shown + 1}));
     $('guide-action').textContent = t(guide.shown === total ? 'guide.build.complete' : 'guide.build.calculate', {n:guide.shown + 1, total});
   }
 
@@ -1946,8 +1976,8 @@
     const current = learning.snapshot();
     const count = current.checked.length;
     const stepKeys = learningModel.SECTIONS[guide.step - 1];
-    $('guide-understood-count').textContent = t('learning.stepCount', {
-      n:stepKeys.filter(key => current.checked.includes(key)).length, total:stepKeys.length});
+    setText($('guide-understood-count'), t('learning.stepCount', {
+      n:stepKeys.filter(key => current.checked.includes(key)).length, total:stepKeys.length}));
     $('settings-understood-count').textContent = t('learning.count', {n:count, total:learningModel.KEYS.length});
     document.querySelectorAll('[data-learning-key]').forEach(section => {
       const checked = current.checked.includes(section.dataset.learningKey);
@@ -1965,11 +1995,11 @@
     $('learning-legacy').hidden = current.legacySteps.length === 0;
     $('learning-legacy').textContent = current.legacySteps.length ? t('learning.legacy', {steps:current.legacySteps.join(', ')}) : '';
     $('learning-save-status').textContent = t(current.save ? 'learning.savingOn' : 'learning.savingOff');
-    $('learning-message').textContent = learningNotice ? t(learningNotice) : '';
+    setText($('learning-message'), learningNotice ? t(learningNotice) : '');
     $('learning-reset-question').textContent = t('learning.question', {n:count}) +
       (current.legacySteps.length ? ' ' + t('learning.clearLegacy') : '');
     $('learning-storage-warning').hidden = !current.error;
-    $('learning-storage-warning').textContent = current.error ? t('learning.error.' + current.error) : '';
+    setText($('learning-storage-warning'), current.error ? t('learning.error.' + current.error) : '');
     for (let i = 1; i <= 7; i += 1) {
       const button = $('guide-step-' + i);
       const title = i + '. ' + t('guide.' + i + '.title');
@@ -2064,7 +2094,10 @@
     guide.prepared = false;
     renderGuide();
   });
-  $('lesson-quiz').addEventListener('click', () => showTab('quiz',true));
+  $('lesson-quiz').addEventListener('click', () => {
+    showTab('quiz');
+    $('quiz-heading').focus();
+  });
 
 
   localize();
